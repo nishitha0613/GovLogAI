@@ -5,7 +5,10 @@ import { Card } from '../ui/Card';
 import { Badge } from '../ui/Badge';
 
 export const SystemHealthCards: React.FC = () => {
-  const { setCurrentRoute } = useApp();
+  const { setCurrentRoute, events, logs } = useApp();
+
+  const isDbDegraded = events.some(e => e.affectedService.toLowerCase().includes('database') || e.affectedService.toLowerCase().includes('tax'));
+  const isApiDegraded = events.some(e => e.severity.includes('P1'));
 
   const systems = [
     {
@@ -13,24 +16,22 @@ export const SystemHealthCards: React.FC = () => {
       name: 'API Gateway',
       subtitle: 'National GovNet Router',
       icon: <Server className="w-4 h-4 text-cyan-400" />,
-      status: 'Healthy',
-      latency: '42ms',
-      uptime: '99.99%',
-      metric: '52.4k req/s',
-      nodes: '32/32 Active',
-      badgeVariant: 'success' as const
+      status: isApiDegraded ? 'Degraded' : 'Healthy',
+      uptime: '100%',
+      metric: logs.length > 0 ? `${logs.length} Ingested` : 'Active',
+      nodes: 'K8s Cluster',
+      badgeVariant: isApiDegraded ? ('warn' as const) : ('success' as const)
     },
     {
       id: 'sys-db',
       name: 'Database Cluster',
       subtitle: 'Postgres Primary & Replicas',
       icon: <Database className="w-4 h-4 text-amber-400" />,
-      status: 'Degraded',
-      latency: '380ms',
-      uptime: '99.45%',
-      metric: '82% Pool Cap',
-      nodes: '22/24 Active',
-      badgeVariant: 'warn' as const
+      status: isDbDegraded ? 'Degraded' : 'Healthy',
+      uptime: '100%',
+      metric: 'DB Storage Vault',
+      nodes: 'Primary & Replicas',
+      badgeVariant: isDbDegraded ? ('warn' as const) : ('success' as const)
     },
     {
       id: 'sys-auth',
@@ -38,10 +39,9 @@ export const SystemHealthCards: React.FC = () => {
       subtitle: 'GovID OAuth2 & SAML Matrix',
       icon: <Key className="w-4 h-4 text-purple-400" />,
       status: 'Healthy',
-      latency: '38ms',
-      uptime: '99.98%',
-      metric: '18.4M logins/d',
-      nodes: '16/16 Active',
+      uptime: '100%',
+      metric: 'OAuth2 Provider',
+      nodes: 'Active Replica',
       badgeVariant: 'success' as const
     },
     {
@@ -50,10 +50,9 @@ export const SystemHealthCards: React.FC = () => {
       subtitle: 'Sovereign Encrypted Storage',
       icon: <HardDrive className="w-4 h-4 text-emerald-400" />,
       status: 'Healthy',
-      latency: '12ms',
       uptime: '100%',
-      metric: '342.6 GB Cold',
-      nodes: '64 Disks Active',
+      metric: 'Encrypted Buffer',
+      nodes: 'Cold Storage Vault',
       badgeVariant: 'success' as const
     },
     {
@@ -62,10 +61,9 @@ export const SystemHealthCards: React.FC = () => {
       subtitle: 'Enterprise Zero-Trust WAF',
       icon: <ShieldCheck className="w-4 h-4 text-blue-400" />,
       status: 'Healthy',
-      latency: '18ms',
-      uptime: '99.99%',
-      metric: '48.2 Mbps Bandwidth',
-      nodes: '128 Edge Nodes',
+      uptime: '100%',
+      metric: 'Ingress Router',
+      nodes: 'Zero-Trust Mesh',
       badgeVariant: 'success' as const
     }
   ];
@@ -81,7 +79,7 @@ export const SystemHealthCards: React.FC = () => {
         </div>
         <span className="text-[11px] font-mono text-emerald-400 hidden sm:inline flex items-center gap-1">
           <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-          All Core Systems Active
+          System Components Online
         </span>
       </div>
 
@@ -110,10 +108,8 @@ export const SystemHealthCards: React.FC = () => {
 
             <div className="space-y-1 pt-2 border-t border-slate-800/80 text-[11px]">
               <div className="flex justify-between text-slate-400">
-                <span>Latency:</span>
-                <span className={`font-bold ${sys.status === 'Degraded' ? 'text-amber-400' : 'text-emerald-400'}`}>
-                  {sys.latency}
-                </span>
+                <span>Uptime:</span>
+                <span className="text-emerald-400 font-bold">{sys.uptime}</span>
               </div>
               <div className="flex justify-between text-slate-400">
                 <span>Metric:</span>

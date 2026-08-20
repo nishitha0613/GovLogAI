@@ -1,9 +1,14 @@
 import React from 'react';
 import { Crosshair, Radio } from 'lucide-react';
 import { Card } from '../ui/Card';
-import { mockThreatOriginData } from '../../data/mockAnalytics';
+import { useApp } from '../../context/AppContext';
 
 export const ThreatRadarMap: React.FC = () => {
+  const { events, logs } = useApp();
+
+  const criticalEvents = events.filter((e) => e.severity.includes('P1') || e.severity.includes('P2'));
+  const criticalLogs = logs.filter((l) => l.level === 'CRITICAL' || l.level === 'FATAL');
+
   return (
     <Card className="bg-[#0c121e]/90 border border-slate-800/80 p-4 rounded-xl flex flex-col justify-between shadow-sm">
       {/* Header */}
@@ -15,8 +20,8 @@ export const ThreatRadarMap: React.FC = () => {
           </h3>
         </div>
         <div className="flex items-center gap-1.5 text-[11px] font-mono text-emerald-400">
-          <Radio className="w-3.5 h-3.5 animate-pulse text-rose-500" />
-          <span>LIVE INTERCEPT</span>
+          <Radio className="w-3.5 h-3.5 animate-pulse text-cyan-400" />
+          <span>RADAR ACTIVE</span>
         </div>
       </div>
 
@@ -47,21 +52,22 @@ export const ThreatRadarMap: React.FC = () => {
           </span>
         </div>
 
-        {/* Threat Target Pins */}
-        <div className="absolute top-8 left-8 flex items-center gap-1">
-          <span className="w-2 h-2 rounded-full bg-rose-500 animate-ping"></span>
-          <span className="text-[9px] font-mono text-rose-400 bg-rose-950/80 px-1 rounded border border-rose-900/50">185.220.101.44</span>
-        </div>
-
-        <div className="absolute bottom-10 right-10 flex items-center gap-1">
-          <span className="w-2 h-2 rounded-full bg-amber-500 animate-ping"></span>
-          <span className="text-[9px] font-mono text-amber-400 bg-amber-950/80 px-1 rounded border border-amber-900/50">194.26.29.112</span>
-        </div>
-
-        <div className="absolute top-12 right-14 flex items-center gap-1">
-          <span className="w-2 h-2 rounded-full bg-purple-500"></span>
-          <span className="text-[9px] font-mono text-purple-400 bg-purple-950/80 px-1 rounded border border-purple-900/50">45.154.255.89</span>
-        </div>
+        {/* Dynamic Threat Target Pins */}
+        {criticalEvents.slice(0, 3).map((evt, idx) => {
+          const positions = [
+            'top-8 left-8',
+            'bottom-10 right-10',
+            'top-12 right-14'
+          ];
+          return (
+            <div key={evt.id} className={`absolute ${positions[idx] || 'top-10 left-12'} flex items-center gap-1`}>
+              <span className="w-2 h-2 rounded-full bg-rose-500 animate-ping"></span>
+              <span className="text-[9px] font-mono text-rose-400 bg-rose-950/80 px-1 rounded border border-rose-900/50">
+                {evt.threatActorIp}
+              </span>
+            </div>
+          );
+        })}
       </div>
 
       {/* Top Attack Vectors List */}
@@ -69,12 +75,18 @@ export const ThreatRadarMap: React.FC = () => {
         <div className="text-[10px] font-mono text-slate-400 uppercase tracking-wider mb-1">
           Intercepted Vectors:
         </div>
-        {mockThreatOriginData.slice(0, 3).map((item, idx) => (
-          <div key={idx} className="flex items-center justify-between text-xs font-mono p-1.5 rounded bg-slate-950 border border-slate-800/80">
-            <span className="text-slate-200 truncate">{item.country}</span>
-            <span className="text-rose-400 font-semibold">{item.attackCount.toLocaleString()} blocks</span>
+        {criticalEvents.length === 0 && criticalLogs.length === 0 ? (
+          <div className="text-center py-2 text-slate-500 font-sans text-xs">
+            No intercepted attack vectors recorded yet.
           </div>
-        ))}
+        ) : (
+          criticalEvents.slice(0, 3).map((item) => (
+            <div key={item.id} className="flex items-center justify-between text-xs font-mono p-1.5 rounded bg-slate-950 border border-slate-800/80">
+              <span className="text-slate-200 truncate">{item.title}</span>
+              <span className="text-rose-400 font-semibold">{item.occurrences} events</span>
+            </div>
+          ))
+        )}
       </div>
     </Card>
   );

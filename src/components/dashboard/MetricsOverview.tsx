@@ -6,7 +6,7 @@ import { Card } from '../ui/Card';
 export const MetricsOverview: React.FC = () => {
   const { logs, alerts, events } = useApp();
 
-  const totalLogsCount = logs.length * 100 > 5000 ? logs.length * 2490 : logs.length;
+  const totalLogsCount = logs.length;
   const criticalEventsCount = logs.filter(l => l.level === 'CRITICAL' || l.level === 'FATAL').length + events.filter(e => e.severity === 'P1 Critical').length;
   const warningsCount = logs.filter(l => l.level === 'WARN').length;
   const activeAlertsCount = alerts.filter(a => a.status === 'Open' || a.status === 'Investigating').length;
@@ -17,8 +17,8 @@ export const MetricsOverview: React.FC = () => {
       id: 'kpi-logs',
       title: 'Total Logs (Analyzed)',
       value: totalLogsCount.toLocaleString(),
-      subText: `${logs.length} Raw Buffer Items`,
-      trend: '+14.2%',
+      subText: `${logs.length} Log Entries`,
+      trend: logs.length > 0 ? `${logs.length} Live` : 'Clean State',
       trendUp: true,
       icon: <Database className="w-4 h-4 text-cyan-400" />,
       borderGlow: 'hover:border-cyan-500/40',
@@ -39,8 +39,8 @@ export const MetricsOverview: React.FC = () => {
       id: 'kpi-warnings',
       title: 'Warnings',
       value: warningsCount.toString(),
-      subText: 'Rate Limit Spikes',
-      trend: 'Spike Alert',
+      subText: `${warningsCount} Warning Logs`,
+      trend: warningsCount > 0 ? 'Spike Flag' : 'Nominal',
       trendUp: true,
       icon: <AlertTriangle className="w-4 h-4 text-amber-400" />,
       borderGlow: 'hover:border-amber-500/40',
@@ -50,7 +50,7 @@ export const MetricsOverview: React.FC = () => {
       id: 'kpi-alerts',
       title: 'Active Alerts',
       value: activeAlertsCount.toString(),
-      subText: 'Triage Queue',
+      subText: `${alerts.length} Total Queue`,
       trend: activeAlertsCount > 0 ? `${activeAlertsCount} Open` : 'Clear',
       trendUp: false,
       icon: <Bell className="w-4 h-4 text-purple-400" />,
@@ -62,7 +62,7 @@ export const MetricsOverview: React.FC = () => {
       title: 'Resolved Events',
       value: resolvedEventsCount.toString(),
       subText: 'Mitigated Incidents',
-      trend: '99.8% Rate',
+      trend: resolvedEventsCount > 0 ? 'Remediated' : 'Ready',
       trendUp: true,
       icon: <CheckCircle2 className="w-4 h-4 text-emerald-400" />,
       borderGlow: 'hover:border-emerald-500/40',

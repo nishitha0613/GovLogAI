@@ -1,9 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
 import type { LogEntry, SecurityEvent, AlertItem, EGovService, LogMetrics } from '../types/log';
 import type { ParsedAnalysisResult } from '../utils/logParser';
-import { mockLogEntries } from '../data/mockLogs';
-import { mockSecurityEvents } from '../data/mockEvents';
-import { mockAlerts } from '../data/mockAlerts';
 import { mockEGovServices } from '../data/mockServices';
 
 export type RouteType = 'landing' | 'dashboard' | 'logs' | 'events' | 'alerts' | 'analytics' | 'settings';
@@ -54,10 +51,10 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   const [selectedLog, setSelectedLog] = useState<LogEntry | null>(null);
   const [selectedEvent, setSelectedEvent] = useState<SecurityEvent | null>(null);
   const [selectedAlert, setSelectedAlert] = useState<AlertItem | null>(null);
-  const [liveStreaming, setLiveStreaming] = useState(true);
-  const [logs, setLogs] = useState<LogEntry[]>(mockLogEntries);
-  const [events, setEvents] = useState<SecurityEvent[]>(mockSecurityEvents);
-  const [alerts, setAlerts] = useState<AlertItem[]>(mockAlerts);
+  const [liveStreaming, setLiveStreaming] = useState(false);
+  const [logs, setLogs] = useState<LogEntry[]>([]);
+  const [events, setEvents] = useState<SecurityEvent[]>([]);
+  const [alerts, setAlerts] = useState<AlertItem[]>([]);
   const [services] = useState<EGovService[]>(mockEGovServices);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [aiCopilotActive, setAiCopilotActive] = useState(true);

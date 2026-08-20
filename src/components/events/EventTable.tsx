@@ -59,8 +59,16 @@ export const EventTable: React.FC<EventTableProps> = ({ events }) => {
           <tbody className="divide-y divide-slate-800/60 font-sans">
             {events.length === 0 ? (
               <tr>
-                <td colSpan={9} className="text-center py-12 text-slate-500 font-mono">
-                  No matching correlated security events found for current filter criteria.
+                <td colSpan={9} className="text-center py-14">
+                  <div className="flex flex-col items-center justify-center space-y-2">
+                    <div className="p-3 rounded-full bg-slate-900 border border-slate-800 text-slate-500 mb-1">
+                      <Layers className="w-6 h-6 text-purple-400" />
+                    </div>
+                    <h4 className="text-sm font-bold text-white font-sans">No security events recorded yet.</h4>
+                    <p className="text-xs text-slate-400 font-sans max-w-sm">
+                      Upload log data in Log Explorer to extract correlated security incidents.
+                    </p>
+                  </div>
                 </td>
               </tr>
             ) : (

@@ -63,8 +63,16 @@ export const AlertTable: React.FC<AlertTableProps> = ({
           <tbody className="divide-y divide-slate-800/60">
             {alerts.length === 0 ? (
               <tr>
-                <td colSpan={8} className="text-center py-12 text-slate-500">
-                  No matching incident alerts found for current filter criteria.
+                <td colSpan={8} className="text-center py-14">
+                  <div className="flex flex-col items-center justify-center space-y-2 font-sans">
+                    <div className="p-3 rounded-full bg-slate-900 border border-slate-800 text-slate-500 mb-1">
+                      <Bell className="w-6 h-6 text-purple-400" />
+                    </div>
+                    <h4 className="text-sm font-bold text-white">No alerts triggered yet.</h4>
+                    <p className="text-xs text-slate-400 max-w-sm">
+                      Alerts will appear here when log ingestion detects active threat conditions or rule violations.
+                    </p>
+                  </div>
                 </td>
               </tr>
             ) : (
