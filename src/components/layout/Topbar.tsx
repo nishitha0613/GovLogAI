@@ -28,13 +28,14 @@ export const Topbar: React.FC = () => {
     landing: { title: 'Sovereign E-Governance Portal', subtitle: 'AI-Powered Log Intelligence & Zero-Trust Audit Matrix' },
     dashboard: { title: 'Executive Command Center', subtitle: 'Real-time threat radar & sovereign infrastructure monitoring' },
     logs: { title: 'Log Explorer & Inspector', subtitle: 'Live log stream query builder with AI anomaly diagnosis' },
-    events: { title: 'Security Event Correlation Engine', subtitle: 'Multi-log incident timeline & attack vector tracing' },
-    alerts: { title: 'Alert Triage & Remediation Center', subtitle: 'Automated AI security playbooks & incident queue' },
+    'security-alerts': { title: 'Security & Alert Center', subtitle: 'Prioritized security events, real-time threat triage & automated playbooks' },
+    events: { title: 'Security & Alert Center', subtitle: 'Prioritized security events, real-time threat triage & automated playbooks' },
+    alerts: { title: 'Security & Alert Center', subtitle: 'Prioritized security events, real-time threat triage & automated playbooks' },
     analytics: { title: 'Deep Infrastructure Analytics', subtitle: 'Latency percentiles, throughput trends & threat forecasting' },
     settings: { title: 'Agency Security Settings', subtitle: 'AI model parameters, log ingestion collectors & RBAC controls' },
   };
 
-  const activeInfo = routeTitles[currentRoute] || routeTitles.dashboard;
+  const activeInfo = routeTitles[currentRoute] || routeTitles.logs;
 
   return (
     <header className="sticky top-0 z-20 bg-[#080c14]/90 backdrop-blur-md border-b border-slate-800/80 px-4 md:px-6 py-2.5 flex items-center justify-between gap-4 font-mono">

@@ -3,7 +3,7 @@ import type { LogEntry, SecurityEvent, AlertItem, EGovService, LogMetrics } from
 import type { ParsedAnalysisResult } from '../utils/logParser';
 import { mockEGovServices } from '../data/mockServices';
 
-export type RouteType = 'landing' | 'dashboard' | 'logs' | 'events' | 'alerts' | 'analytics' | 'settings';
+export type RouteType = 'landing' | 'dashboard' | 'logs' | 'security-alerts' | 'analytics' | 'settings' | 'events' | 'alerts';
 
 interface AppContextType {
   currentRoute: RouteType;
@@ -29,6 +29,8 @@ interface AppContextType {
   acknowledgeAlert: (id: string) => void;
   investigateAlert: (id: string) => void;
   resolveAlert: (id: string) => void;
+  dismissAlert: (id: string) => void;
+  dismissEvent: (id: string) => void;
   triggerRemediation: (alertId: string) => void;
   sidebarCollapsed: boolean;
   setSidebarCollapsed: (collapsed: boolean) => void;
@@ -102,7 +104,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   useEffect(() => {
     const handleHashChange = () => {
       const hash = window.location.hash.replace('#', '');
-      const validRoutes: RouteType[] = ['landing', 'dashboard', 'logs', 'events', 'alerts', 'analytics', 'settings'];
+      const validRoutes: RouteType[] = ['landing', 'dashboard', 'logs', 'security-alerts', 'events', 'alerts', 'analytics', 'settings'];
       if (validRoutes.includes(hash as RouteType)) {
         setCurrentRouteState(hash as RouteType);
       }
@@ -182,8 +184,19 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
   const resolveAlert = (id: string) => {
     setAlerts((prev) =>
-      prev.map((alert) => (alert.id === id ? { ...alert, status: 'Resolved' } : alert))
+      prev.map((alert) => (alert.id === id || alert.relatedEventId === id ? { ...alert, status: 'Resolved' } : alert))
     );
+    setEvents((prev) =>
+      prev.map((evt) => (evt.id === id || evt.id === `EVT-${id.replace(/\D/g, '')}` || id.includes(evt.id) ? { ...evt, status: 'Resolved' } : evt))
+    );
+  };
+
+  const dismissAlert = (id: string) => {
+    setAlerts((prev) => prev.filter((alert) => alert.id !== id));
+  };
+
+  const dismissEvent = (id: string) => {
+    setEvents((prev) => prev.filter((evt) => evt.id !== id));
   };
 
   const triggerRemediation = (alertId: string) => {
@@ -227,6 +240,8 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         acknowledgeAlert,
         investigateAlert,
         resolveAlert,
+        dismissAlert,
+        dismissEvent,
         triggerRemediation,
         sidebarCollapsed,
         setSidebarCollapsed,

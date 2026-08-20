@@ -1,9 +1,7 @@
 import React from 'react';
 import { 
   Shield, 
-  LayoutDashboard, 
   Terminal, 
-  Flame, 
   Bell, 
   BarChart3, 
   Settings, 
@@ -24,7 +22,7 @@ interface NavItem {
 }
 
 export const Sidebar: React.FC = () => {
-  const { currentRoute, setCurrentRoute, sidebarCollapsed, setSidebarCollapsed, alerts, logs } = useApp();
+  const { currentRoute, setCurrentRoute, sidebarCollapsed, setSidebarCollapsed, alerts, logs, events } = useApp();
 
   const openAlertsCount = alerts.filter(a => a.status === 'Open' || a.status === 'Investigating').length;
   const criticalLogsCount = logs.filter(l => l.level === 'CRITICAL' || l.level === 'FATAL').length;
@@ -36,11 +34,6 @@ export const Sidebar: React.FC = () => {
       icon: <Globe className="w-5 h-5" />,
     },
     {
-      id: 'dashboard',
-      label: 'Executive Command',
-      icon: <LayoutDashboard className="w-5 h-5" />,
-    },
-    {
       id: 'logs',
       label: 'Log Explorer',
       icon: <Terminal className="w-5 h-5" />,
@@ -48,17 +41,10 @@ export const Sidebar: React.FC = () => {
       badgeVariant: 'critical',
     },
     {
-      id: 'events',
-      label: 'Security Events',
-      icon: <Flame className="w-5 h-5" />,
-      badge: '4 Correlated',
-      badgeVariant: 'purple',
-    },
-    {
-      id: 'alerts',
-      label: 'Alert Triage',
+      id: 'security-alerts',
+      label: 'Security & Alerts',
       icon: <Bell className="w-5 h-5" />,
-      badge: openAlertsCount > 0 ? `${openAlertsCount} Open` : undefined,
+      badge: (events.length + openAlertsCount) > 0 ? `${events.length + openAlertsCount}` : undefined,
       badgeVariant: 'warn',
     },
     {
@@ -129,7 +115,7 @@ export const Sidebar: React.FC = () => {
         </div>
 
         {navItems.map((item) => {
-          const isActive = currentRoute === item.id;
+          const isActive = currentRoute === item.id || (item.id === 'security-alerts' && (currentRoute === 'events' || currentRoute === 'alerts'));
           return (
             <button
               key={item.id}

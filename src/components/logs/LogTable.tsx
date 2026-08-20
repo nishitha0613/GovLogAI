@@ -1,5 +1,5 @@
 import React from 'react';
-import { ChevronRight, Download, Sparkles, ShieldAlert, Layers, FileText } from 'lucide-react';
+import { ChevronRight, Download, Sparkles, FileText } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import type { LogEntry } from '../../types/log';
 import { Badge } from '../ui/Badge';
@@ -11,7 +11,7 @@ interface LogTableProps {
 }
 
 export const LogTable: React.FC<LogTableProps> = ({ logs, hasProcessedLogs = false }) => {
-  const { setSelectedLog, events } = useApp();
+  const { setSelectedLog } = useApp();
 
   const exportLogsAsJson = () => {
     const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(logs, null, 2));
@@ -56,8 +56,8 @@ export const LogTable: React.FC<LogTableProps> = ({ logs, hasProcessedLogs = fal
               <th className="py-2.5 px-3.5">Log Message</th>
               <th className="py-2.5 px-3.5">Category</th>
               <th className="py-2.5 px-3.5">Severity</th>
-              <th className="py-2.5 px-3.5">Classification</th>
-              <th className="py-2.5 px-3.5">Correlation</th>
+              <th className="py-2.5 px-3.5">Classification & ML</th>
+              <th className="py-2.5 px-3.5">SHA-256 Audit Hash</th>
               <th className="py-2.5 px-3.5 text-right">Inspect</th>
             </tr>
           </thead>
@@ -85,11 +85,6 @@ export const LogTable: React.FC<LogTableProps> = ({ logs, hasProcessedLogs = fal
             ) : (
               logs.map((log) => {
                 const isCritical = log.level === 'CRITICAL' || log.level === 'FATAL';
-                
-                // Find matching correlated event group
-                const matchingEvent = events.find(e => 
-                  e.affectedService === log.service && (e.category === log.category || e.relatedLogs.some(l => l.id === log.id))
-                );
 
                 const timeDisplay = log.timestamp.includes('T')
                   ? log.timestamp.split('T')[1].slice(0, 12)
@@ -141,22 +136,21 @@ export const LogTable: React.FC<LogTableProps> = ({ logs, hasProcessedLogs = fal
                     </td>
 
                     <td className="py-2.5 px-3.5 whitespace-nowrap text-xs">
-                      <div className="flex items-center gap-1 text-slate-300">
-                        {isCritical && <ShieldAlert className="w-3.5 h-3.5 text-rose-400 shrink-0" />}
+                      <div className="flex flex-col">
                         <span className={isCritical ? 'text-rose-400 font-semibold font-mono text-[11px]' : 'text-slate-300 font-sans'}>
                           {log.threatVector || 'Standard Operations'}
+                        </span>
+                        <span className="text-[10px] text-cyan-400 font-mono">
+                          ML Score: {log.anomalyScore || 10}/100
                         </span>
                       </div>
                     </td>
 
-                    <td className="py-2.5 px-3.5 whitespace-nowrap font-mono text-[11px]">
-                      {matchingEvent ? (
-                        <span className="text-purple-400 font-bold flex items-center gap-1">
-                          <Layers className="w-3 h-3" /> [{matchingEvent.id}]
-                        </span>
-                      ) : (
-                        <span className="text-slate-500">Uncorrelated</span>
-                      )}
+                    <td className="py-2.5 px-3.5 whitespace-nowrap font-mono text-[10px] text-slate-400" title={log.hash || 'SHA-256 Audit Block Hash'}>
+                      <div className="flex items-center gap-1">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0" title="Tamper-proof hash verified" />
+                        <span className="text-slate-300 font-bold">{log.hash ? `${log.hash.slice(0, 10)}...` : 'SHA256-PENDING'}</span>
+                      </div>
                     </td>
 
                     <td className="py-2.5 px-3.5 text-right whitespace-nowrap">

@@ -1,79 +1,84 @@
 import React from 'react';
-import { Terminal, AlertTriangle, ShieldAlert, Layers, CheckCircle2 } from 'lucide-react';
+import { Info, AlertTriangle, AlertOctagon, ShieldAlert } from 'lucide-react';
 import { Card } from '../ui/Card';
+import type { LogEntry } from '../../types/log';
 
 interface LogAnalysisSummaryProps {
-  fileName?: string;
-  totalLogs?: number;
-  errorCount?: number;
-  criticalCount?: number;
-  eventGroupsCount?: number;
-  confidenceRating?: number | string;
-  isCustomFile?: boolean;
+  logs?: LogEntry[];
 }
 
-export const LogAnalysisSummary: React.FC<LogAnalysisSummaryProps> = ({
-  fileName = 'sovereign_egov_cluster.log',
-  totalLogs = 12450,
-  errorCount = 184,
-  criticalCount = 14,
-  eventGroupsCount = 3,
-  confidenceRating = 'Rule-Based',
-  isCustomFile = false,
-}) => {
-  const summaryKpis = [
+export const LogAnalysisSummary: React.FC<LogAnalysisSummaryProps> = ({ logs = [] }) => {
+  const infoCount = logs.filter(l => l.level === 'INFO').length;
+  const warnCount = logs.filter(l => l.level === 'WARN').length;
+  const errorCount = logs.filter(l => l.level === 'ERROR').length;
+  const criticalCount = logs.filter(l => l.level === 'CRITICAL' || l.level === 'FATAL').length;
+  const totalLogs = logs.length;
+
+  const severityCards = [
     {
-      title: 'Total Logs Processed',
-      value: totalLogs.toLocaleString(),
-      subText: `Source: ${fileName}`,
-      icon: <Terminal className="w-5 h-5 text-cyan-400" />,
-      color: 'text-cyan-400'
+      title: 'INFO',
+      count: infoCount,
+      pct: totalLogs > 0 ? ((infoCount / totalLogs) * 100).toFixed(1).replace(/\.0$/, '') : '0',
+      icon: <Info className="w-5 h-5 text-emerald-400" />,
+      badgeBg: 'bg-emerald-950/60 border-emerald-800/60 text-emerald-400',
+      textColor: 'text-emerald-400',
+      subText: 'Standard operational log entries'
     },
     {
-      title: 'Error Count',
-      value: errorCount.toLocaleString(),
-      subText: 'ERROR & 500 Status Entries',
+      title: 'WARNING',
+      count: warnCount,
+      pct: totalLogs > 0 ? ((warnCount / totalLogs) * 100).toFixed(1).replace(/\.0$/, '') : '0',
       icon: <AlertTriangle className="w-5 h-5 text-amber-400" />,
-      color: 'text-amber-400'
+      badgeBg: 'bg-amber-950/60 border-amber-800/60 text-amber-400',
+      textColor: 'text-amber-400',
+      subText: 'System warnings & throttles'
     },
     {
-      title: 'Critical Events',
-      value: criticalCount.toString(),
-      subText: 'CRITICAL Level & Security Threats',
+      title: 'ERROR',
+      count: errorCount,
+      pct: totalLogs > 0 ? ((errorCount / totalLogs) * 100).toFixed(1).replace(/\.0$/, '') : '0',
+      icon: <AlertOctagon className="w-5 h-5 text-orange-400" />,
+      badgeBg: 'bg-orange-950/60 border-orange-800/60 text-orange-400',
+      textColor: 'text-orange-400',
+      subText: 'System errors & 5xx HTTP codes'
+    },
+    {
+      title: 'CRITICAL',
+      count: criticalCount,
+      pct: totalLogs > 0 ? ((criticalCount / totalLogs) * 100).toFixed(1).replace(/\.0$/, '') : '0',
       icon: <ShieldAlert className="w-5 h-5 text-rose-400" />,
-      color: 'text-rose-400'
-    },
-    {
-      title: 'Correlated Event Groups',
-      value: eventGroupsCount.toString(),
-      subText: 'Incident Groups Synthesized',
-      icon: <Layers className="w-5 h-5 text-purple-400" />,
-      color: 'text-purple-400'
-    },
-    {
-      title: isCustomFile ? 'Analysis Engine' : 'AI Confidence Rating',
-      value: isCustomFile ? 'Rule-Based' : typeof confidenceRating === 'number' ? `${confidenceRating}%` : confidenceRating,
-      subText: isCustomFile ? 'Automated Log Parsing Engine' : 'Neural signature match',
-      icon: <CheckCircle2 className="w-4 h-4 text-emerald-400" />,
-      color: 'text-emerald-400'
+      badgeBg: 'bg-rose-950/60 border-rose-800/60 text-rose-400',
+      textColor: 'text-rose-400',
+      subText: 'Critical security vectors'
     }
   ];
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3.5 font-mono">
-      {summaryKpis.map((kpi, idx) => (
-        <Card key={idx} className="bg-[#0c121e]/90 border border-slate-800/80 p-3.5 rounded-xl hover:border-cyan-500/40 transition shadow-sm">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 font-mono">
+      {severityCards.map((card) => (
+        <Card key={card.title} className="bg-[#0c121e]/90 border border-slate-800/80 p-4 rounded-xl hover:border-slate-700 transition shadow-sm">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-xs text-slate-400 font-sans font-medium truncate">{kpi.title}</span>
-            <div className="p-1.5 rounded-lg bg-slate-950 border border-slate-800 shrink-0">
-              {kpi.icon}
+            <span className="text-xs font-bold font-sans tracking-wide text-slate-300">
+              {card.title}
+            </span>
+            <div className={`p-2 rounded-xl border ${card.badgeBg}`}>
+              {card.icon}
             </div>
           </div>
-          <div className={`text-2xl font-bold font-mono ${kpi.color}`}>
-            {kpi.value}
+
+          <div className="flex items-baseline justify-between">
+            <div className={`text-3xl font-extrabold font-mono ${card.textColor}`}>
+              {card.count.toLocaleString()}
+            </div>
+            {totalLogs > 0 && (
+              <span className="text-xs font-mono text-slate-400 font-semibold">
+                {card.pct}%
+              </span>
+            )}
           </div>
-          <div className="text-[10px] text-slate-400 mt-2 truncate font-sans">
-            {kpi.subText}
+
+          <div className="text-[11px] text-slate-400 mt-1.5 truncate font-sans">
+            {card.subText}
           </div>
         </Card>
       ))}

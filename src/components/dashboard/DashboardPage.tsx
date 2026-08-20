@@ -1,109 +1,87 @@
-import React, { useState } from 'react';
-import { Filter, Radio, LayoutGrid } from 'lucide-react';
+import React from 'react';
+import { ShieldCheck, Server, Cpu, Lock, ArrowRight } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
-import { MetricsOverview } from './MetricsOverview';
-import { SystemHealthCards } from './SystemHealthCards';
-import { DashboardCharts } from './DashboardCharts';
-import { AiInsightsPanel } from './AiInsightsPanel';
-import { RecentCriticalEventsTable } from './RecentCriticalEventsTable';
-import { ThreatRadarMap } from './ThreatRadarMap';
-import { EventDetailModal } from '../events/EventDetailModal';
-import { AiLogInspector } from '../logs/AiLogInspector';
+import { Card } from '../ui/Card';
+import { Badge } from '../ui/Badge';
 
 export const DashboardPage: React.FC = () => {
-  const { liveStreaming, toggleLiveStreaming, services } = useApp();
-  const [selectedServiceFilter, setSelectedServiceFilter] = useState('ALL');
-  const [selectedTimeframe, setSelectedTimeframe] = useState('24h');
+  const { logs, events, setCurrentRoute } = useApp();
+
+  const totalLogs = logs.length;
+  const criticalCount = events.filter(e => e.severity.includes('P1') || e.severity.includes('Critical')).length;
 
   return (
-    <div className="space-y-5">
-      {/* Dashboard Control Toolbar */}
-      <div className="bg-[#0c121e]/90 p-3.5 rounded-xl border border-slate-800/80 flex flex-col md:flex-row md:items-center justify-between gap-3 font-mono text-xs shadow-sm">
-        <div className="flex items-center gap-2">
-          <LayoutGrid className="w-4 h-4 text-cyan-400" />
-          <span className="text-white font-bold font-sans tracking-wide">
-            Executive Command Center
-          </span>
-          <span className="text-[11px] text-slate-400 hidden lg:inline font-mono">
-            • Sovereign Observability Matrix
-          </span>
+    <div className="p-4 md:p-6 max-w-[1200px] mx-auto space-y-6 font-sans">
+      {/* High-Level System Health Status Banner */}
+      <Card className="bg-[#0c121e]/90 border border-slate-800/80 p-6 rounded-xl space-y-4 shadow-sm">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800/80 pb-4">
+          <div className="flex items-center gap-3">
+            <div className="p-3 rounded-xl bg-emerald-950/80 border border-emerald-800/80 text-emerald-400">
+              <ShieldCheck className="w-7 h-7" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2 font-mono text-xs text-slate-400">
+                <span>E-GOVERNANCE SYSTEM POSTURE</span>
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+              </div>
+              <h1 className="text-xl font-bold text-white font-sans mt-0.5">
+                Executive Command — System Overview
+              </h1>
+            </div>
+          </div>
+
+          <Badge variant={criticalCount > 0 ? 'critical' : 'success'} size="md">
+            {criticalCount > 0 ? 'Actionable Threats Detected' : 'Operational Normal'}
+          </Badge>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2.5">
-          {/* E-Gov Service Filter */}
-          <div className="flex items-center gap-1.5 text-slate-400">
-            <Filter className="w-3.5 h-3.5 text-cyan-400" />
-            <select
-              value={selectedServiceFilter}
-              onChange={(e) => setSelectedServiceFilter(e.target.value)}
-              className="bg-slate-950 border border-slate-800 text-slate-200 text-xs font-mono rounded-lg px-2.5 py-1 focus:outline-none focus:border-cyan-500 cursor-pointer"
-            >
-              <option value="ALL">All Microservices</option>
-              {services.map((s) => (
-                <option key={s.id} value={s.name}>
-                  {s.name}
-                </option>
-              ))}
-            </select>
+        <p className="text-slate-300 text-xs leading-relaxed font-sans max-w-3xl">
+          GovLogAI is actively monitoring sovereign government digital infrastructure. All log ingestion, threat classification, and cryptographic audit hashing are executing within your local air-gapped environment.
+        </p>
+
+        {/* High-Level Infrastructure Status Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2 font-mono text-xs">
+          <div className="p-4 rounded-xl bg-slate-950 border border-slate-800/80 space-y-1">
+            <div className="flex items-center gap-2 text-slate-400 font-sans text-xs">
+              <Server className="w-4 h-4 text-cyan-400" />
+              <span>Log Ingestion Status</span>
+            </div>
+            <div className="text-lg font-bold text-white mt-1">
+              {totalLogs > 0 ? `${totalLogs.toLocaleString()} Buffer Entries` : 'Idle / Standby'}
+            </div>
+            <div className="text-[10px] text-slate-500">Local Sovereign Ingestion Engine</div>
           </div>
 
-          {/* Timeframe selector */}
-          <div className="flex items-center gap-0.5 bg-slate-950 p-0.5 rounded-lg border border-slate-800 text-xs">
-            {(['1h', '24h', '7d'] as const).map((tf) => (
-              <button
-                key={tf}
-                onClick={() => setSelectedTimeframe(tf)}
-                className={`px-2.5 py-1 rounded transition cursor-pointer font-mono ${
-                  selectedTimeframe === tf
-                    ? 'bg-cyan-500 text-slate-950 font-bold'
-                    : 'text-slate-400 hover:text-white'
-                }`}
-              >
-                {tf}
-              </button>
-            ))}
+          <div className="p-4 rounded-xl bg-slate-950 border border-slate-800/80 space-y-1">
+            <div className="flex items-center gap-2 text-slate-400 font-sans text-xs">
+              <Cpu className="w-4 h-4 text-purple-400" />
+              <span>ML & Cryptographic Engine</span>
+            </div>
+            <div className="text-lg font-bold text-purple-400 mt-1">Active / Air-Gapped</div>
+            <div className="text-[10px] text-slate-500">SHA-256 + Isolation Forest ML</div>
           </div>
 
-          {/* Live Stream Toggle */}
+          <div className="p-4 rounded-xl bg-slate-950 border border-slate-800/80 space-y-1">
+            <div className="flex items-center gap-2 text-slate-400 font-sans text-xs">
+              <Lock className="w-4 h-4 text-emerald-400" />
+              <span>Data Sovereignty</span>
+            </div>
+            <div className="text-lg font-bold text-emerald-400 mt-1">100% On-Premise</div>
+            <div className="text-[10px] text-slate-500">Zero External Cloud Dependencies</div>
+          </div>
+        </div>
+
+        {/* Navigation Quick Link to Detailed Security Analysis */}
+        <div className="pt-2 flex justify-end">
           <button
-            onClick={toggleLiveStreaming}
-            className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-xs font-mono transition cursor-pointer ${
-              liveStreaming
-                ? 'bg-emerald-950/80 text-emerald-400 border-emerald-800/60'
-                : 'bg-slate-950 text-slate-400 border-slate-800'
-            }`}
+            onClick={() => setCurrentRoute('security-alerts')}
+            className="px-4 py-2 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-slate-950 font-bold text-xs transition inline-flex items-center gap-2 cursor-pointer font-sans"
           >
-            <Radio className={`w-3.5 h-3.5 ${liveStreaming ? 'animate-pulse text-emerald-400' : ''}`} />
-            <span>{liveStreaming ? 'STREAM: LIVE' : 'PAUSED'}</span>
+            <span>Go to Detailed Security & Alerts Analysis</span>
+            <ArrowRight className="w-4 h-4" />
           </button>
         </div>
-      </div>
-
-      {/* 1. KPI Cards */}
-      <MetricsOverview />
-
-      {/* 2. System Health Cards */}
-      <SystemHealthCards />
-
-      {/* 3. Charts */}
-      <DashboardCharts />
-
-      {/* 4. AI Insights Panel */}
-      <AiInsightsPanel />
-
-      {/* 5. Middle Grid: Recent Critical Events Table & Threat Origin Radar */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-        <div className="lg:col-span-2">
-          <RecentCriticalEventsTable />
-        </div>
-        <div>
-          <ThreatRadarMap />
-        </div>
-      </div>
-
-      {/* Interactive Modals */}
-      <EventDetailModal />
-      <AiLogInspector />
+      </Card>
     </div>
   );
 };

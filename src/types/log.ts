@@ -19,6 +19,9 @@ export interface LogEntry {
   threatVector?: string;
   payloadJson?: string;
   mitigationScript?: string;
+  hash?: string;
+  prevHash?: string;
+  threatIntelFeed?: string;
 }
 
 export type EventSeverity = 'P1 Critical' | 'P2 High' | 'P3 Medium' | 'P4 Low';
@@ -46,6 +49,7 @@ export interface SecurityEvent {
   status: EventStatus;
   aiRootCause: string;
   whyGroupedExplanation: string;
+  xaiExplanation?: string;
   recommendedActions: string[];
   threatActorIp: string;
   country: string;

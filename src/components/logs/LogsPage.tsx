@@ -53,16 +53,8 @@ export const LogsPage: React.FC = () => {
       {/* 1. Log Upload & Pipeline Stepper Section */}
       <LogUploader onAnalysisComplete={handleAnalysisComplete} />
 
-      {/* 2. AI Analysis Summary KPI Cards */}
-      <LogAnalysisSummary
-        fileName={analysisResult ? `${analysisResult.fileName} (${analysisResult.fileSizeFormatted})` : 'No log file loaded'}
-        totalLogs={analysisResult ? analysisResult.totalLogs : 0}
-        errorCount={analysisResult ? analysisResult.errorCount : 0}
-        criticalCount={analysisResult ? analysisResult.criticalCount : 0}
-        eventGroupsCount={analysisResult ? analysisResult.eventGroupsCount : 0}
-        confidenceRating={analysisResult ? analysisResult.confidenceRating : 'N/A'}
-        isCustomFile={!!analysisResult}
-      />
+      {/* 2. Four Severity Summary Cards (INFO, WARNING, ERROR, CRITICAL) */}
+      <LogAnalysisSummary logs={activeLogsToFilter} />
 
       {/* 3. Raw Log Terminal Buffer Viewer */}
       <RawLogTerminal
