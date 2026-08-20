@@ -25,39 +25,39 @@ export const Topbar: React.FC = () => {
   const openAlerts = alerts.filter(a => a.status === 'Open' || a.status === 'Investigating');
 
   const routeTitles: Record<string, { title: string; subtitle: string }> = {
-    landing: { title: 'Sovereign E-Governance Platform', subtitle: 'AI-Powered Log Intelligence & Zero-Trust Audit Matrix' },
-    dashboard: { title: 'Executive Command Center', subtitle: 'Real-time threat radar & e-gov infrastructure monitoring (Prototype Demo Data)' },
-    logs: { title: 'Log Explorer & Inspector', subtitle: 'Live log stream query builder with AI anomaly diagnosis (Prototype Sample Data)' },
-    events: { title: 'Security Event Correlation Engine', subtitle: 'Multi-log incident timeline & attack vector tracing (Demo Incident Correlations)' },
-    alerts: { title: 'Alert Triage & Remediation Center', subtitle: 'Automated AI security playbooks & incident queue (Illustrative Detections)' },
-    analytics: { title: 'Deep Infrastructure Analytics', subtitle: 'Latency percentiles, throughput trends & threat forecasting (Prototype Simulation)' },
+    landing: { title: 'Sovereign E-Governance Portal', subtitle: 'AI-Powered Log Intelligence & Zero-Trust Audit Matrix' },
+    dashboard: { title: 'Executive Command Center', subtitle: 'Real-time threat radar & sovereign infrastructure monitoring' },
+    logs: { title: 'Log Explorer & Inspector', subtitle: 'Live log stream query builder with AI anomaly diagnosis' },
+    events: { title: 'Security Event Correlation Engine', subtitle: 'Multi-log incident timeline & attack vector tracing' },
+    alerts: { title: 'Alert Triage & Remediation Center', subtitle: 'Automated AI security playbooks & incident queue' },
+    analytics: { title: 'Deep Infrastructure Analytics', subtitle: 'Latency percentiles, throughput trends & threat forecasting' },
     settings: { title: 'Agency Security Settings', subtitle: 'AI model parameters, log ingestion collectors & RBAC controls' },
   };
 
   const activeInfo = routeTitles[currentRoute] || routeTitles.dashboard;
 
   return (
-    <header className="sticky top-0 z-20 bg-[#080c14]/90 backdrop-blur-md border-b border-slate-800/80 px-6 py-3 flex items-center justify-between gap-4 font-mono">
-      {/* Left: Page Title & Breadcrumb */}
-      <div className="flex items-center gap-4">
-        <div>
+    <header className="sticky top-0 z-20 bg-[#080c14]/90 backdrop-blur-md border-b border-slate-800/80 px-4 md:px-6 py-2.5 flex items-center justify-between gap-4 font-mono">
+      {/* Left: Page Title & Subtitle */}
+      <div className="flex items-center gap-4 min-w-0">
+        <div className="truncate">
           <div className="flex items-center gap-2">
-            <h1 className="text-lg font-bold text-white tracking-tight font-sans">{activeInfo.title}</h1>
-            <Badge variant="purple" size="sm">
+            <h1 className="text-base md:text-lg font-bold text-white tracking-tight font-sans truncate">{activeInfo.title}</h1>
+            <Badge variant="info" size="sm" className="hidden sm:inline-flex shrink-0">
               <ShieldCheck className="w-3 h-3 text-cyan-400" />
-              <span>PROTOTYPE DEMO</span>
+              <span>SECURED</span>
             </Badge>
           </div>
-          <p className="text-xs text-slate-400 hidden sm:block font-mono">{activeInfo.subtitle}</p>
+          <p className="text-[11px] text-slate-400 hidden sm:block font-mono truncate">{activeInfo.subtitle}</p>
         </div>
       </div>
 
-      {/* Right: Quick Search, Controls & Profile */}
-      <div className="flex items-center gap-3">
+      {/* Right: Quick Search, Controls & Notifications */}
+      <div className="flex items-center gap-2 sm:gap-3 shrink-0">
         {/* Quick Cmd+K Search trigger */}
         <button
           onClick={() => setQuickSearchOpen(true)}
-          className="hidden md:flex items-center gap-3 bg-slate-900/90 hover:bg-slate-800 border border-slate-800 hover:border-cyan-500/40 text-slate-400 hover:text-slate-200 px-3.5 py-1.5 rounded-xl text-xs transition cursor-pointer"
+          className="hidden md:flex items-center gap-2.5 bg-slate-900/90 hover:bg-slate-800 border border-slate-800 hover:border-cyan-500/40 text-slate-400 hover:text-slate-200 px-3 py-1.5 rounded-lg text-xs transition cursor-pointer"
         >
           <Search className="w-3.5 h-3.5 text-cyan-400" />
           <span>Search logs, IPs, CVEs...</span>
@@ -66,19 +66,19 @@ export const Topbar: React.FC = () => {
           </kbd>
         </button>
 
-        {/* Live Stream Play/Pause Pill */}
+        {/* Live Stream Toggle */}
         {currentRoute !== 'landing' && (
           <button
             onClick={toggleLiveStreaming}
-            className={`flex items-center gap-2 px-3 py-1.5 rounded-xl border text-xs font-mono transition cursor-pointer ${
+            className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border text-xs font-mono transition cursor-pointer ${
               liveStreaming
                 ? 'bg-emerald-950/60 text-emerald-400 border-emerald-800/50 hover:bg-emerald-900/60'
                 : 'bg-slate-900 text-slate-400 border-slate-800 hover:bg-slate-800'
             }`}
-            title="Toggle Simulated Log Stream Ingestion"
+            title="Toggle Log Ingestion Stream"
           >
             <Radio className={`w-3.5 h-3.5 ${liveStreaming ? 'animate-pulse text-emerald-400' : ''}`} />
-            <span className="hidden sm:inline">{liveStreaming ? 'STREAM: LIVE DEMO' : 'STREAM: PAUSED'}</span>
+            <span className="hidden sm:inline">{liveStreaming ? 'LIVE' : 'PAUSED'}</span>
           </button>
         )}
 

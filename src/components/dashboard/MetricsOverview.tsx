@@ -18,39 +18,43 @@ export const MetricsOverview: React.FC = () => {
       title: 'Total Logs (Analyzed)',
       value: totalLogsCount.toLocaleString(),
       subText: `${logs.length} Raw Buffer Items`,
+      trend: '+14.2%',
       trendUp: true,
-      icon: <Database className="w-5 h-5 text-cyan-400" />,
-      borderGlow: 'hover:border-cyan-500/50',
+      icon: <Database className="w-4 h-4 text-cyan-400" />,
+      borderGlow: 'hover:border-cyan-500/40',
       badgeColor: 'text-cyan-400 bg-cyan-950/60 border-cyan-800/60'
     },
     {
       id: 'kpi-critical',
       title: 'Critical Events',
       value: criticalEventsCount.toString(),
-      subText: `${events.length} Event Groups`,
+      subText: `${events.length} Incident Groups`,
+      trend: criticalEventsCount > 0 ? 'P1 Active' : 'Optimal',
       trendUp: false,
-      icon: <ShieldAlert className="w-5 h-5 text-rose-400" />,
-      borderGlow: 'hover:border-rose-500/50',
-      badgeColor: 'text-rose-400 bg-rose-950/60 border-rose-800/60'
+      icon: <ShieldAlert className="w-4 h-4 text-rose-400" />,
+      borderGlow: 'hover:border-rose-500/40',
+      badgeColor: criticalEventsCount > 0 ? 'text-rose-400 bg-rose-950/60 border-rose-800/60' : 'text-emerald-400 bg-emerald-950/60 border-emerald-800/60'
     },
     {
       id: 'kpi-warnings',
       title: 'Warnings',
       value: warningsCount.toString(),
-      subText: 'Rate Limit & Status Spikes',
+      subText: 'Rate Limit Spikes',
+      trend: 'Spike Alert',
       trendUp: true,
-      icon: <AlertTriangle className="w-5 h-5 text-amber-400" />,
-      borderGlow: 'hover:border-amber-500/50',
+      icon: <AlertTriangle className="w-4 h-4 text-amber-400" />,
+      borderGlow: 'hover:border-amber-500/40',
       badgeColor: 'text-amber-400 bg-amber-950/60 border-amber-800/60'
     },
     {
       id: 'kpi-alerts',
       title: 'Active Alerts',
       value: activeAlertsCount.toString(),
-      subText: 'Triage Queue Items',
+      subText: 'Triage Queue',
+      trend: activeAlertsCount > 0 ? `${activeAlertsCount} Open` : 'Clear',
       trendUp: false,
-      icon: <Bell className="w-5 h-5 text-purple-400" />,
-      borderGlow: 'hover:border-purple-500/50',
+      icon: <Bell className="w-4 h-4 text-purple-400" />,
+      borderGlow: 'hover:border-purple-500/40',
       badgeColor: 'text-purple-400 bg-purple-950/60 border-purple-800/60'
     },
     {
@@ -58,35 +62,36 @@ export const MetricsOverview: React.FC = () => {
       title: 'Resolved Events',
       value: resolvedEventsCount.toString(),
       subText: 'Mitigated Incidents',
+      trend: '99.8% Rate',
       trendUp: true,
-      icon: <CheckCircle2 className="w-5 h-5 text-emerald-400" />,
-      borderGlow: 'hover:border-emerald-500/50',
+      icon: <CheckCircle2 className="w-4 h-4 text-emerald-400" />,
+      borderGlow: 'hover:border-emerald-500/40',
       badgeColor: 'text-emerald-400 bg-emerald-950/60 border-emerald-800/60'
     }
   ];
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 font-mono">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3.5 font-mono">
       {kpis.map((kpi) => (
         <Card
           key={kpi.id}
-          className={`bg-slate-900/90 border border-slate-800 transition-all duration-300 ${kpi.borderGlow} hover:-translate-y-0.5 cursor-pointer`}
+          className={`bg-[#0c121e]/90 border border-slate-800/80 p-4 rounded-xl transition-all duration-200 ${kpi.borderGlow} hover:-translate-y-0.5 cursor-pointer shadow-sm`}
         >
-          <div className="flex items-center justify-between mb-3">
-            <span className="text-xs text-slate-400 font-semibold truncate">{kpi.title}</span>
-            <div className="p-2 rounded-xl bg-slate-950 border border-slate-800 shadow-inner">
+          <div className="flex items-center justify-between mb-2.5">
+            <span className="text-xs text-slate-400 font-semibold font-sans truncate">{kpi.title}</span>
+            <div className="p-1.5 rounded-lg bg-slate-950 border border-slate-800 shrink-0">
               {kpi.icon}
             </div>
           </div>
 
-          <div className="text-2xl lg:text-3xl font-black text-white tracking-tight">
+          <div className="text-2xl xl:text-3xl font-bold text-white tracking-tight">
             {kpi.value}
           </div>
 
-          <div className="flex items-center justify-between text-[11px] mt-3 pt-2 border-t border-slate-800/80">
+          <div className="flex items-center justify-between text-[11px] mt-3 pt-2 border-t border-slate-800/70">
             <span className="text-slate-400 truncate">{kpi.subText}</span>
-            <span className={`px-1.5 py-0.5 rounded border text-[10px] font-bold ${kpi.badgeColor}`}>
-              LIVE DEMO
+            <span className={`px-1.5 py-0.5 rounded border text-[10px] font-mono font-medium ${kpi.badgeColor}`}>
+              {kpi.trend}
             </span>
           </div>
         </Card>

@@ -20,11 +20,11 @@ export const AppLayout: React.FC<{ children: ReactNode }> = ({ children }) => {
   }
 
   return (
-    <div className="min-h-screen bg-[#070b14] text-slate-100 flex selection:bg-cyan-500 selection:text-black">
+    <div className="min-h-screen bg-[#070b14] text-slate-100 flex selection:bg-cyan-500 selection:text-black font-sans">
       <Sidebar />
-      <div className="flex-1 flex flex-col min-w-0">
+      <div className="flex-1 flex flex-col min-w-0 max-w-full">
         <Topbar />
-        <main className="flex-1 p-4 md:p-6 overflow-y-auto">{children}</main>
+        <main className="flex-1 p-3.5 sm:p-5 lg:p-6 overflow-y-auto">{children}</main>
         <Footer />
       </div>
       <QuickSearchModal />

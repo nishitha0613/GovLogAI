@@ -134,18 +134,18 @@ export const Sidebar: React.FC = () => {
             <button
               key={item.id}
               onClick={() => setCurrentRoute(item.id)}
-              className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 cursor-pointer ${
+              className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs md:text-sm font-medium transition-all duration-150 cursor-pointer ${
                 isActive
-                  ? 'bg-gradient-to-r from-cyan-500/15 to-blue-500/5 text-cyan-300 border border-cyan-500/30 shadow-md shadow-cyan-500/5'
-                  : 'text-slate-400 hover:text-slate-100 hover:bg-slate-800/50 border border-transparent'
+                  ? 'bg-gradient-to-r from-cyan-500/20 via-cyan-500/10 to-transparent text-cyan-300 font-semibold border-l-4 border-cyan-400 pl-2.5 shadow-sm'
+                  : 'text-slate-400 hover:text-slate-100 hover:bg-slate-800/40 border-l-4 border-transparent pl-2.5'
               }`}
               title={sidebarCollapsed ? item.label : undefined}
             >
-              <div className="flex items-center gap-3">
-                <span className={isActive ? 'text-cyan-400' : 'text-slate-400'}>
+              <div className="flex items-center gap-2.5 min-w-0">
+                <span className={`shrink-0 ${isActive ? 'text-cyan-400' : 'text-slate-400'}`}>
                   {item.icon}
                 </span>
-                {!sidebarCollapsed && <span className="truncate">{item.label}</span>}
+                {!sidebarCollapsed && <span className="truncate font-sans tracking-wide">{item.label}</span>}
               </div>
 
               {!sidebarCollapsed && item.badge && (

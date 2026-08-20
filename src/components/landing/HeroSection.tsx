@@ -13,78 +13,78 @@ export const HeroSection: React.FC = () => {
       <div className="absolute top-1/3 left-1/4 w-[350px] h-[250px] bg-blue-600/10 blur-[100px] rounded-full pointer-events-none" />
 
       <div className="max-w-6xl mx-auto text-center relative z-10 space-y-8">
-        {/* Prototype Identification Badge */}
-        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-slate-900/90 border border-cyan-500/30 text-cyan-300 text-xs font-mono shadow-xl shadow-cyan-500/5">
-          <ShieldCheck className="w-4 h-4 text-cyan-400" />
-          <span>AI-Powered Server Log Intelligence Prototype</span>
+        {/* Classification Badge */}
+        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#0c121e] border border-cyan-500/30 text-cyan-300 text-xs font-mono shadow-md">
+          <ShieldCheck className="w-3.5 h-3.5 text-cyan-400" />
+          <span>Sovereign AI Log Intelligence & Observability Platform</span>
           <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse"></span>
         </div>
 
         {/* Hero Headline */}
-        <h1 className="text-4xl sm:text-6xl lg:text-7xl font-extrabold text-white tracking-tight max-w-5xl mx-auto leading-[1.1]">
-          Turn Server Logs Into{' '}
+        <h1 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold text-white tracking-tight max-w-4xl mx-auto leading-[1.15]">
+          Turn Complex Logs Into{' '}
           <span className="bg-gradient-to-r from-cyan-400 via-blue-400 to-emerald-400 bg-clip-text text-transparent">
             Actionable Intelligence
           </span>
         </h1>
 
         {/* Product Description */}
-        <p className="text-base sm:text-lg text-slate-300 max-w-3xl mx-auto font-sans leading-relaxed">
-          GovLogAI ingests, parses, and classifies server log streams across e-governance microservice architectures. Automatically group correlated log entries into events, evaluate anomaly severity, and receive AI-assisted root cause insights and actionable remediation playbooks.
+        <p className="text-sm sm:text-base text-slate-300 max-w-2xl mx-auto font-sans leading-relaxed">
+          GovLogAI ingests, parses, and classifies log streams across e-governance infrastructure. Group correlated log entries into events, evaluate anomaly severity, and execute AI-assisted root cause insights & remediation playbooks.
         </p>
 
         {/* Action Buttons */}
-        <div className="flex flex-wrap items-center justify-center gap-4 pt-2">
+        <div className="flex flex-wrap items-center justify-center gap-3 pt-1">
           <Button
             variant="primary"
-            size="lg"
+            size="md"
             onClick={() => setCurrentRoute('dashboard')}
-            icon={<LayoutGrid className="w-5 h-5" />}
+            icon={<LayoutGrid className="w-4 h-4" />}
           >
-            Launch Dashboard
+            Launch Executive Command
           </Button>
           <Button
             variant="outline"
-            size="lg"
+            size="md"
             onClick={() => setCurrentRoute('logs')}
-            icon={<Terminal className="w-5 h-5 text-cyan-400" />}
+            icon={<Terminal className="w-4 h-4 text-cyan-400" />}
           >
-            Analyze Logs
+            Log Explorer
           </Button>
         </div>
 
-        {/* Prototype Core Capabilities Bar */}
-        <div className="pt-10 grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto text-left font-mono">
-          <div className="glass-panel p-4 rounded-xl border border-slate-800/90">
-            <div className="text-lg font-bold text-white flex items-center gap-1.5">
+        {/* Core Capabilities Bar */}
+        <div className="pt-8 grid grid-cols-2 md:grid-cols-4 gap-3 max-w-4xl mx-auto text-left font-mono">
+          <div className="bg-[#0c121e]/90 p-3.5 rounded-xl border border-slate-800/80 shadow-sm">
+            <div className="text-base font-bold text-white flex items-center gap-1.5 font-sans">
               <span>Multi-Source</span>
-              <Terminal className="w-4 h-4 text-cyan-400" />
+              <Terminal className="w-3.5 h-3.5 text-cyan-400" />
             </div>
-            <div className="text-xs text-slate-400 mt-1">Syslog, JSON & CSV Ingest</div>
+            <div className="text-xs text-slate-400 mt-1 font-sans">Syslog, JSON & CSV Ingest</div>
           </div>
 
-          <div className="glass-panel p-4 rounded-xl border border-slate-800/90">
-            <div className="text-lg font-bold text-cyan-400 flex items-center gap-1.5">
+          <div className="bg-[#0c121e]/90 p-3.5 rounded-xl border border-slate-800/80 shadow-sm">
+            <div className="text-base font-bold text-cyan-400 flex items-center gap-1.5 font-sans">
               <span>AI Classifier</span>
-              <Cpu className="w-4 h-4 text-cyan-400" />
+              <Cpu className="w-3.5 h-3.5 text-cyan-400" />
             </div>
-            <div className="text-xs text-slate-400 mt-1">Severity & Vector Detection</div>
+            <div className="text-xs text-slate-400 mt-1 font-sans">Severity & Vector Detection</div>
           </div>
 
-          <div className="glass-panel p-4 rounded-xl border border-slate-800/90">
-            <div className="text-lg font-bold text-purple-400 flex items-center gap-1.5">
+          <div className="bg-[#0c121e]/90 p-3.5 rounded-xl border border-slate-800/80 shadow-sm">
+            <div className="text-base font-bold text-purple-400 flex items-center gap-1.5 font-sans">
               <span>Event Grouping</span>
-              <Layers className="w-4 h-4 text-purple-400" />
+              <Layers className="w-3.5 h-3.5 text-purple-400" />
             </div>
-            <div className="text-xs text-slate-400 mt-1">Pattern Correlation Engine</div>
+            <div className="text-xs text-slate-400 mt-1 font-sans">Correlation Matrix Engine</div>
           </div>
 
-          <div className="glass-panel p-4 rounded-xl border border-slate-800/90">
-            <div className="text-lg font-bold text-emerald-400 flex items-center gap-1.5">
-              <span>AI Insights</span>
-              <Sparkles className="w-4 h-4 text-emerald-400" />
+          <div className="bg-[#0c121e]/90 p-3.5 rounded-xl border border-slate-800/80 shadow-sm">
+            <div className="text-base font-bold text-emerald-400 flex items-center gap-1.5 font-sans">
+              <span>AI Playbooks</span>
+              <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
             </div>
-            <div className="text-xs text-slate-400 mt-1">Recommended Remediation</div>
+            <div className="text-xs text-slate-400 mt-1 font-sans">Automated Remediation</div>
           </div>
         </div>
       </div>

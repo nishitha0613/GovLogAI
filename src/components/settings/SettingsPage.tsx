@@ -16,21 +16,21 @@ export const SettingsPage: React.FC = () => {
   ];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       {/* Tabs */}
-      <div className="flex items-center gap-2 border-b border-slate-800 pb-2 overflow-x-auto">
+      <div className="flex items-center gap-2 border-b border-slate-800/80 pb-2.5 overflow-x-auto">
         {tabs.map((tab) => (
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id as any)}
-            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-mono transition cursor-pointer ${
+            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-mono transition cursor-pointer ${
               activeTab === tab.id
-                ? 'bg-cyan-500 text-slate-950 font-bold shadow-lg shadow-cyan-500/20'
-                : 'bg-slate-900 text-slate-400 hover:text-white border border-slate-800'
+                ? 'bg-cyan-500 text-slate-950 font-bold shadow-sm'
+                : 'bg-slate-950 text-slate-400 hover:text-white border border-slate-800/80'
             }`}
           >
             {tab.icon}
-            <span>{tab.label}</span>
+            <span className="font-sans font-medium">{tab.label}</span>
           </button>
         ))}
       </div>

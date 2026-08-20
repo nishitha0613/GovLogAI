@@ -13,7 +13,7 @@ export const AnalyticsPage: React.FC = () => {
   const [selectedSeverity, setSelectedSeverity] = useState('ALL');
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       {/* 1. Date Range & Filter Controls */}
       <AnalyticsFilterBar
         timeframe={timeframe}
@@ -37,7 +37,7 @@ export const AnalyticsPage: React.FC = () => {
       <AiGeneratedInsightsSection />
 
       {/* 6. Latency Percentiles & AI Predictive Forecast Suite */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
         <LatencyHeatmap />
         <PredictiveForecasting />
       </div>

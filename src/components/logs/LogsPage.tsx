@@ -10,7 +10,7 @@ import { LogTable } from './LogTable';
 import { AiLogInspector } from './AiLogInspector';
 
 export const LogsPage: React.FC = () => {
-  const { logs: defaultLogs, searchQuery, analysisResult, setAnalysisResult } = useApp();
+  const { searchQuery, analysisResult, setAnalysisResult } = useApp();
   const [selectedLevel, setSelectedLevel] = useState<LogLevel | 'ALL'>('ALL');
   const [selectedService, setSelectedService] = useState<string>('ALL');
   const [selectedStatusCode, setSelectedStatusCode] = useState<string>('ALL');
@@ -20,7 +20,7 @@ export const LogsPage: React.FC = () => {
     setAnalysisResult(result);
   };
 
-  const activeLogsToFilter: LogEntry[] = analysisResult ? analysisResult.logs : defaultLogs;
+  const activeLogsToFilter: LogEntry[] = analysisResult ? analysisResult.logs : [];
 
   // Filter logic
   const filteredLogs = activeLogsToFilter.filter((log) => {
@@ -49,18 +49,18 @@ export const LogsPage: React.FC = () => {
   });
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       {/* 1. Log Upload & Pipeline Stepper Section */}
       <LogUploader onAnalysisComplete={handleAnalysisComplete} />
 
       {/* 2. AI Analysis Summary KPI Cards */}
       <LogAnalysisSummary
-        fileName={analysisResult ? `${analysisResult.fileName} (${analysisResult.fileSizeFormatted})` : 'sovereign_egov_cluster.log'}
-        totalLogs={analysisResult ? analysisResult.totalLogs : defaultLogs.length * 2490}
-        errorCount={analysisResult ? analysisResult.errorCount : 184}
-        criticalCount={analysisResult ? analysisResult.criticalCount : 14}
-        eventGroupsCount={analysisResult ? analysisResult.eventGroupsCount : 3}
-        confidenceRating={analysisResult ? analysisResult.confidenceRating : 99.4}
+        fileName={analysisResult ? `${analysisResult.fileName} (${analysisResult.fileSizeFormatted})` : 'No log file loaded'}
+        totalLogs={analysisResult ? analysisResult.totalLogs : 0}
+        errorCount={analysisResult ? analysisResult.errorCount : 0}
+        criticalCount={analysisResult ? analysisResult.criticalCount : 0}
+        eventGroupsCount={analysisResult ? analysisResult.eventGroupsCount : 0}
+        confidenceRating={analysisResult ? analysisResult.confidenceRating : 'N/A'}
         isCustomFile={!!analysisResult}
       />
 
@@ -79,8 +79,9 @@ export const LogsPage: React.FC = () => {
           setSelectedService={setSelectedService}
           selectedStatusCode={selectedStatusCode}
           setSelectedStatusCode={setSelectedStatusCode}
+          availableServices={analysisResult ? Array.from(new Set(analysisResult.logs.map(l => l.service))) : []}
         />
-        <LogTable logs={filteredLogs} />
+        <LogTable logs={filteredLogs} hasProcessedLogs={!!analysisResult} />
       </div>
 
       {/* Interactive AI Inspector Side Drawer */}

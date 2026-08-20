@@ -24,26 +24,27 @@ export const DashboardCharts: React.FC = () => {
   ];
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 font-mono text-xs">
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 font-mono text-xs">
       {/* 1. Log Activity Chart Over Time */}
-      <Card className="lg:col-span-2 bg-slate-900/90 border border-slate-800">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-800 mb-4">
+      <Card className="lg:col-span-2 bg-[#0c121e]/90 border border-slate-800/80 p-4 rounded-xl shadow-sm">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-800/80 mb-3.5">
           <div className="flex items-center gap-2">
-            <BarChart3 className="w-5 h-5 text-cyan-400" />
-            <h3 className="text-sm font-bold text-white uppercase tracking-wide">
-              Log Activity Stream Over Time ({logs.length} Buffer Logs)
+            <BarChart3 className="w-4 h-4 text-cyan-400" />
+            <h3 className="text-xs font-bold text-white font-sans uppercase tracking-wider">
+              Log Ingestion Stream Volume
             </h3>
+            <span className="text-[11px] text-slate-400 font-mono">({logs.length} Live Items)</span>
           </div>
 
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-1">
             {(['1h', '24h', '7d'] as const).map((tf) => (
               <button
                 key={tf}
                 onClick={() => setTimeframe(tf)}
-                className={`px-3 py-1 rounded-lg transition cursor-pointer ${
+                className={`px-2.5 py-0.5 rounded transition cursor-pointer text-xs font-mono ${
                   timeframe === tf
                     ? 'bg-cyan-500 text-slate-950 font-bold'
-                    : 'bg-slate-800 text-slate-400 hover:text-white'
+                    : 'bg-slate-950 text-slate-400 hover:text-white border border-slate-800'
                 }`}
               >
                 {tf}
@@ -52,7 +53,7 @@ export const DashboardCharts: React.FC = () => {
           </div>
         </div>
 
-        <div className="h-64 w-full">
+        <div className="h-60 w-full">
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={mockThroughputData}>
               <defs>
@@ -67,7 +68,7 @@ export const DashboardCharts: React.FC = () => {
               </defs>
               <XAxis dataKey="time" stroke="#64748b" tick={{ fontSize: 11 }} />
               <YAxis stroke="#64748b" tick={{ fontSize: 11 }} />
-              <Tooltip contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', borderRadius: '8px', color: '#fff' }} />
+              <Tooltip contentStyle={{ backgroundColor: '#090d16', borderColor: '#334155', borderRadius: '8px', color: '#fff' }} />
               <Area type="monotone" dataKey="eventsPerSec" stroke="#06b6d4" strokeWidth={2} fill="url(#colorLogVol)" name="Log Vol (Events/s)" />
               <Area type="monotone" dataKey="threatsPerSec" stroke="#f43f5e" strokeWidth={2} fill="url(#colorThreatBlocks)" name="Threat Blocks/s" />
             </AreaChart>
@@ -76,26 +77,26 @@ export const DashboardCharts: React.FC = () => {
       </Card>
 
       {/* 2. Severity Distribution Chart */}
-      <Card className="bg-slate-900/90 border border-slate-800 flex flex-col justify-between">
-        <div className="flex items-center justify-between pb-3 border-b border-slate-800">
+      <Card className="bg-[#0c121e]/90 border border-slate-800/80 p-4 rounded-xl flex flex-col justify-between shadow-sm">
+        <div className="flex items-center justify-between pb-3 border-b border-slate-800/80 mb-2">
           <div className="flex items-center gap-2">
-            <PieIcon className="w-5 h-5 text-purple-400" />
-            <h3 className="text-sm font-bold text-white uppercase tracking-wide">
-              Severity Distribution
+            <PieIcon className="w-4 h-4 text-purple-400" />
+            <h3 className="text-xs font-bold text-white font-sans uppercase tracking-wider">
+              Severity Breakdown
             </h3>
           </div>
-          <span className="text-slate-400">{logs.length} Log Buffer</span>
+          <span className="text-slate-400 text-[11px] font-mono">{logs.length} Buffer</span>
         </div>
 
-        <div className="h-44 my-2">
+        <div className="h-40 my-1">
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
               <Pie
                 data={severityData}
                 cx="50%"
                 cy="50%"
-                innerRadius={45}
-                outerRadius={75}
+                innerRadius={40}
+                outerRadius={70}
                 paddingAngle={4}
                 dataKey="count"
               >
@@ -103,16 +104,16 @@ export const DashboardCharts: React.FC = () => {
                   <Cell key={`cell-${index}`} fill={entry.color} />
                 ))}
               </Pie>
-              <Tooltip contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', borderRadius: '8px', color: '#fff' }} />
+              <Tooltip contentStyle={{ backgroundColor: '#090d16', borderColor: '#334155', borderRadius: '8px', color: '#fff' }} />
             </PieChart>
           </ResponsiveContainer>
         </div>
 
-        <div className="space-y-1.5 pt-2 border-t border-slate-800 text-[11px]">
+        <div className="space-y-1.5 pt-2 border-t border-slate-800/80 text-[11px]">
           {severityData.map((s, idx) => (
             <div key={idx} className="flex items-center justify-between">
               <span className="flex items-center gap-2 text-slate-300">
-                <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: s.color }} />
+                <span className="w-2 h-2 rounded-full" style={{ backgroundColor: s.color }} />
                 <span className="truncate">{s.name}</span>
               </span>
               <span className="text-slate-400 font-bold">{s.percentage}</span>

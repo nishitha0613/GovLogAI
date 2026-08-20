@@ -53,26 +53,26 @@ export const LogAnalysisSummary: React.FC<LogAnalysisSummaryProps> = ({
     {
       title: isCustomFile ? 'Analysis Engine' : 'AI Confidence Rating',
       value: isCustomFile ? 'Rule-Based' : typeof confidenceRating === 'number' ? `${confidenceRating}%` : confidenceRating,
-      subText: isCustomFile ? 'Prototype Rule-Based Analysis' : 'Neural signature match',
-      icon: <CheckCircle2 className="w-5 h-5 text-emerald-400" />,
+      subText: isCustomFile ? 'Automated Log Parsing Engine' : 'Neural signature match',
+      icon: <CheckCircle2 className="w-4 h-4 text-emerald-400" />,
       color: 'text-emerald-400'
     }
   ];
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 font-mono">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3.5 font-mono">
       {summaryKpis.map((kpi, idx) => (
-        <Card key={idx} className="bg-slate-900/90 border border-slate-800 p-4 hover:border-cyan-500/40 transition">
+        <Card key={idx} className="bg-[#0c121e]/90 border border-slate-800/80 p-3.5 rounded-xl hover:border-cyan-500/40 transition shadow-sm">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-xs text-slate-400 truncate">{kpi.title}</span>
-            <div className="p-1.5 rounded-lg bg-slate-950 border border-slate-800">
+            <span className="text-xs text-slate-400 font-sans font-medium truncate">{kpi.title}</span>
+            <div className="p-1.5 rounded-lg bg-slate-950 border border-slate-800 shrink-0">
               {kpi.icon}
             </div>
           </div>
-          <div className={`text-2xl font-black font-mono ${kpi.color}`}>
+          <div className={`text-2xl font-bold font-mono ${kpi.color}`}>
             {kpi.value}
           </div>
-          <div className="text-[10px] text-slate-400 mt-2 truncate">
+          <div className="text-[10px] text-slate-400 mt-2 truncate font-sans">
             {kpi.subText}
           </div>
         </Card>

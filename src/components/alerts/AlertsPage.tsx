@@ -50,28 +50,28 @@ export const AlertsPage: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       {/* Action Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 font-mono text-xs">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 font-mono text-xs bg-[#0c121e]/90 p-3.5 rounded-xl border border-slate-800/80 shadow-sm">
         <div className="flex items-center gap-2">
-          <Bell className="w-5 h-5 text-purple-400" />
+          <Bell className="w-4 h-4 text-purple-400" />
           <div>
-            <h1 className="text-base font-bold text-white uppercase tracking-wide">
-              Security Incident & Alert Triage Workspace
+            <h1 className="text-sm font-bold text-white uppercase tracking-wider font-sans">
+              Security Alert Triage Workspace
             </h1>
             <p className="text-slate-400 text-xs font-sans">
-              Real-time threat detection alerts and automated playbook response management.
+              Real-time threat detection queue and automated remediation playbooks
             </p>
           </div>
         </div>
 
         <Button
           variant="primary"
-          size="md"
+          size="sm"
           onClick={() => setIsRuleModalOpen(true)}
-          icon={<Plus className="w-4 h-4" />}
+          icon={<Plus className="w-3.5 h-3.5" />}
         >
-          Create Neural Alert Rule
+          Create Alert Rule
         </Button>
       </div>
 

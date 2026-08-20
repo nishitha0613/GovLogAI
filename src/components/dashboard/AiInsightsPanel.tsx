@@ -81,88 +81,88 @@ export const AiInsightsPanel: React.FC = () => {
   };
 
   return (
-    <Card className="glass-panel-glow border border-purple-500/40 bg-slate-900/90 font-mono text-xs space-y-4">
+    <Card className="border border-purple-500/30 bg-[#0c121e]/90 p-4 rounded-xl font-mono text-xs space-y-3.5 shadow-sm">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-purple-800/50">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-800/80">
         <div className="flex items-center gap-2">
-          <Sparkles className="w-5 h-5 text-purple-400 animate-spin-slow" />
+          <Sparkles className="w-4 h-4 text-purple-400 animate-spin-slow" />
           <div>
-            <h3 className="text-sm font-bold text-white uppercase tracking-wide">
-              GovLogAI Derived Insights & AI Remediation Engine
+            <h3 className="text-xs font-bold text-white font-sans uppercase tracking-wider">
+              AI Security Intelligence & Automated Playbooks
             </h3>
-            <p className="text-[11px] text-purple-300 font-sans">
-              Insights dynamically calculated from the current log analysis & incident correlation context.
+            <p className="text-[11px] text-slate-400 font-sans">
+              Context-driven insights synthesized from live log stream & correlation matrix
             </p>
           </div>
         </div>
 
-        <Badge variant="purple" size="md">
-          Neural Copilot Active
+        <Badge variant="purple" size="sm" className="shrink-0 self-start sm:self-auto">
+          AI Copilot Operational
         </Badge>
       </div>
 
       {/* Dynamic Summary Micro-KPI Bar */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 font-mono text-xs">
-        <div className="p-3 rounded-xl bg-slate-950 border border-slate-800">
-          <div className="text-slate-500 text-[10px]">Top Log Category</div>
-          <div className="text-sm font-bold text-cyan-400 truncate mt-0.5">{mostCommonCategory}</div>
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5 font-mono text-xs">
+        <div className="p-2.5 rounded-lg bg-slate-950 border border-slate-800/80">
+          <div className="text-slate-400 text-[10px] uppercase font-semibold">Top Log Category</div>
+          <div className="text-xs font-bold text-cyan-400 truncate mt-0.5 font-sans">{mostCommonCategory}</div>
         </div>
 
-        <div className="p-3 rounded-xl bg-slate-950 border border-slate-800">
-          <div className="text-slate-500 text-[10px]">Highest Severity</div>
-          <div className="text-sm font-bold text-rose-400 truncate mt-0.5">{highestSeverity}</div>
+        <div className="p-2.5 rounded-lg bg-slate-950 border border-slate-800/80">
+          <div className="text-slate-400 text-[10px] uppercase font-semibold">Highest Severity</div>
+          <div className="text-xs font-bold text-rose-400 truncate mt-0.5 font-mono">{highestSeverity}</div>
         </div>
 
-        <div className="p-3 rounded-xl bg-slate-950 border border-slate-800">
-          <div className="text-slate-500 text-[10px]">Grouped Incidents</div>
-          <div className="text-sm font-bold text-purple-300 truncate mt-0.5">{groupedIncidentsCount} Events</div>
+        <div className="p-2.5 rounded-lg bg-slate-950 border border-slate-800/80">
+          <div className="text-slate-400 text-[10px] uppercase font-semibold">Correlated Events</div>
+          <div className="text-xs font-bold text-purple-300 truncate mt-0.5 font-mono">{groupedIncidentsCount} Timelines</div>
         </div>
 
-        <div className="p-3 rounded-xl bg-slate-950 border border-slate-800">
-          <div className="text-slate-500 text-[10px]">Active Alerts</div>
-          <div className="text-sm font-bold text-amber-400 truncate mt-0.5">{alerts.length} Items</div>
+        <div className="p-2.5 rounded-lg bg-slate-950 border border-slate-800/80">
+          <div className="text-slate-400 text-[10px] uppercase font-semibold">Active Queue</div>
+          <div className="text-xs font-bold text-amber-400 truncate mt-0.5 font-mono">{alerts.length} Alerts</div>
         </div>
       </div>
 
       {/* Insights List */}
-      <div className="space-y-4 pt-1">
+      <div className="space-y-3 pt-1">
         {insights.map((ins) => {
           const isExecuted = executedIds.includes(ins.id);
           return (
             <div
               key={ins.id}
-              className={`p-4 rounded-xl bg-slate-950/80 border transition-all space-y-2.5 ${
+              className={`p-3.5 rounded-xl bg-slate-950 border transition-all space-y-2 ${
                 isExecuted
                   ? 'border-emerald-800/60 bg-emerald-950/20'
                   : ins.badgeVariant === 'critical'
-                  ? 'border-rose-900/60 hover:border-rose-600/80 shadow-lg shadow-rose-950/20'
-                  : 'border-slate-800 hover:border-purple-500/40'
+                  ? 'border-rose-900/60 hover:border-rose-600/80'
+                  : 'border-slate-800/80 hover:border-purple-500/40'
               }`}
             >
-              <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-2">
                 <div className="space-y-1 flex-1">
-                  <div className="flex flex-wrap items-center gap-2">
+                  <div className="flex flex-wrap items-center gap-2 text-xs">
                     <Badge variant={ins.badgeVariant} size="sm">
                       {ins.severity}
                     </Badge>
-                    <span className="text-purple-300 font-bold">{ins.vector}</span>
+                    <span className="text-purple-300 font-semibold font-sans">{ins.vector}</span>
                     <span className="text-slate-400">• {ins.affected}</span>
                   </div>
 
-                  <h4 className="text-sm font-bold text-white font-sans tracking-tight">{ins.title}</h4>
+                  <h4 className="text-xs font-bold text-white font-sans">{ins.title}</h4>
                   <p className="text-slate-300 font-sans text-xs leading-relaxed">{ins.summary}</p>
                 </div>
               </div>
 
               {/* Remediation Bar */}
-              <div className="pt-2 border-t border-slate-800/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div className="pt-2 border-t border-slate-800/80 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                 <div className="text-[11px] text-cyan-300 flex items-center gap-1.5 truncate">
                   <Zap className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
-                  <span className="truncate">Action: {ins.actionLabel}</span>
+                  <span className="truncate font-sans font-medium">Action: {ins.actionLabel}</span>
                 </div>
 
-                <div className="flex items-center gap-2">
-                  <pre className="px-2.5 py-1 rounded bg-slate-900 text-emerald-400 text-[10px] truncate max-w-[260px] hidden lg:block">
+                <div className="flex items-center gap-2 shrink-0">
+                  <pre className="px-2 py-0.5 rounded bg-slate-900 text-emerald-400 text-[10px] font-mono truncate max-w-[260px] hidden lg:block border border-slate-800">
                     {ins.script}
                   </pre>
 
@@ -173,7 +173,7 @@ export const AiInsightsPanel: React.FC = () => {
                     onClick={() => handleRunRemediation(ins.id)}
                     icon={isExecuted ? <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" /> : <Play className="w-3.5 h-3.5" />}
                   >
-                    {isExecuted ? 'Playbook Executed' : 'Run Remediation'}
+                    {isExecuted ? 'Executed' : 'Execute Remediation'}
                   </Button>
                 </div>
               </div>
