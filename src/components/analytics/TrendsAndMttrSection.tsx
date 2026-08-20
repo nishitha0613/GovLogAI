@@ -10,6 +10,16 @@ export const TrendsAndMttrSection: React.FC = () => {
   const p2Count = events.filter((e) => e.severity.includes('P2')).length;
   const resolvedCount = events.filter((e) => e.status === 'Resolved' || e.status === 'Mitigated').length;
 
+  const getSeverityRank = (severity: string): number => {
+    if (severity.includes('P1')) return 1;
+    if (severity.includes('P2')) return 2;
+    if (severity.includes('P3')) return 3;
+    if (severity.includes('P4')) return 4;
+    return 5;
+  };
+
+  const sortedEvents = [...events].sort((a, b) => getSeverityRank(a.severity) - getSeverityRank(b.severity));
+
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 font-mono text-xs">
       {/* 1. Critical Incident Trends & MTTR Section */}
@@ -81,12 +91,12 @@ export const TrendsAndMttrSection: React.FC = () => {
         </div>
 
         <div className="space-y-3">
-          {events.length === 0 ? (
+          {sortedEvents.length === 0 ? (
             <div className="py-10 text-center text-slate-500 font-sans text-xs">
               No recurring issues recorded yet.
             </div>
           ) : (
-            events.slice(0, 4).map((issue, idx) => (
+            sortedEvents.slice(0, 4).map((issue, idx) => (
               <div key={issue.id} className="p-3 rounded-xl bg-slate-950 border border-slate-800 space-y-1">
                 <div className="flex items-center justify-between font-mono">
                   <span className="text-cyan-400 font-bold">#{idx + 1} {issue.severity}</span>
