@@ -3,6 +3,7 @@ import { Sidebar } from './Sidebar';
 import { Topbar } from './Topbar';
 import { Footer } from './Footer';
 import { QuickSearchModal } from '../ui/QuickSearchModal';
+import { IpBlockModal } from '../common/IpBlockModal';
 import { useApp } from '../../context/AppContext';
 
 export const AppLayout: React.FC<{ children: ReactNode }> = ({ children }) => {
@@ -15,6 +16,7 @@ export const AppLayout: React.FC<{ children: ReactNode }> = ({ children }) => {
         <main className="flex-1">{children}</main>
         <Footer />
         <QuickSearchModal />
+        <IpBlockModal />
       </div>
     );
   }
@@ -28,6 +30,7 @@ export const AppLayout: React.FC<{ children: ReactNode }> = ({ children }) => {
         <Footer />
       </div>
       <QuickSearchModal />
+      <IpBlockModal />
     </div>
   );
 };

@@ -2,8 +2,17 @@ import React, { createContext, useContext, useState, useEffect, type ReactNode }
 import type { LogEntry, SecurityEvent, AlertItem, EGovService, LogMetrics } from '../types/log';
 import type { ParsedAnalysisResult } from '../utils/logParser';
 import { mockEGovServices } from '../data/mockServices';
+import { verifyLogHashChain, computeLogHashChain } from '../utils/cryptoHasher';
 
 export type RouteType = 'landing' | 'dashboard' | 'logs' | 'security-alerts' | 'analytics' | 'settings' | 'events' | 'alerts';
+
+export interface IpBlockPromptData {
+  isOpen: boolean;
+  ipAddress: string;
+  sourceTitle: string;
+  eventId: string;
+  severity: string;
+}
 
 interface AppContextType {
   currentRoute: RouteType;
@@ -43,6 +52,27 @@ interface AppContextType {
   analysisResult: ParsedAnalysisResult | null;
   setAnalysisResult: (result: ParsedAnalysisResult | null) => void;
   metrics: LogMetrics;
+
+  // Cryptographic Audit Trail Engine State & Handlers
+  auditResult: {
+    isChainValid: boolean;
+    totalLogs: number;
+    verifiedCount: number;
+    tamperedCount: number;
+    tamperedLogIds: string[];
+  };
+  tamperWithLog: (logId: string, newMessage?: string) => void;
+  recalculateAndSignChain: () => void;
+  verifyCurrentLogs: () => void;
+
+  // IP Block Workflow (CRITICAL Events Only)
+  blockedIps: string[];
+  isIpBlocked: (ip: string) => boolean;
+  ipBlockPrompt: IpBlockPromptData | null;
+  confirmIpBlock: (shouldBlock: boolean) => void;
+  resolveEventOrAlert: (target: any) => void;
+  blockToastMessage: string | null;
+  dismissBlockToast: () => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -182,13 +212,87 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     );
   };
 
-  const resolveAlert = (id: string) => {
-    setAlerts((prev) =>
-      prev.map((alert) => (alert.id === id || alert.relatedEventId === id ? { ...alert, status: 'Resolved' } : alert))
-    );
+  // IP Block Workflow (CRITICAL Events Only)
+  const [blockedIps, setBlockedIps] = useState<string[]>([]);
+  const [ipBlockPrompt, setIpBlockPrompt] = useState<IpBlockPromptData | null>(null);
+  const [blockToastMessage, setBlockToastMessage] = useState<string | null>(null);
+
+  const isIpBlocked = (ip: string) => blockedIps.includes(ip);
+
+  const resolveEventOrAlert = (target: any) => {
+    if (!target) return;
+
+    let targetId = typeof target === 'string' ? target : target.id;
+    let targetSeverity = '';
+    let targetTitle = 'Security Event / Alert';
+    let sourceIp = '192.168.10.45';
+
+    if (typeof target === 'string') {
+      const foundEvt = events.find(e => e.id === target);
+      const foundAlt = alerts.find(a => a.id === target);
+      if (foundEvt) {
+        targetSeverity = foundEvt.severity;
+        targetTitle = foundEvt.title;
+        sourceIp = foundEvt.threatActorIp || (foundEvt.relatedLogs && foundEvt.relatedLogs[0]?.ipAddress) || sourceIp;
+      } else if (foundAlt) {
+        targetSeverity = foundAlt.severity;
+        targetTitle = foundAlt.title;
+        sourceIp = (foundAlt.relatedEventId && events.find(e => e.id === foundAlt.relatedEventId)?.threatActorIp) || sourceIp;
+      }
+    } else {
+      targetId = target.id;
+      targetSeverity = target.severity || target.level || '';
+      targetTitle = target.title || target.message || 'Security Event';
+      sourceIp = target.threatActorIp || target.ipAddress || (target.relatedLogs && target.relatedLogs[0]?.ipAddress) || sourceIp;
+    }
+
+    const sevUpper = targetSeverity.toUpperCase();
+    const isCritical = sevUpper.includes('P1') || sevUpper.includes('CRITICAL') || sevUpper.includes('FATAL');
+
+    // 1. Mark event/alert status as Resolved
     setEvents((prev) =>
-      prev.map((evt) => (evt.id === id || evt.id === `EVT-${id.replace(/\D/g, '')}` || id.includes(evt.id) ? { ...evt, status: 'Resolved' } : evt))
+      prev.map((evt) => (evt.id === targetId || evt.id === `EVT-${targetId.replace(/\D/g, '')}` || targetId.includes(evt.id) ? { ...evt, status: 'Resolved' } : evt))
     );
+    setAlerts((prev) =>
+      prev.map((alert) => (alert.id === targetId || alert.relatedEventId === targetId ? { ...alert, status: 'Resolved' } : alert))
+    );
+
+    if (selectedEvent && (selectedEvent.id === targetId || selectedEvent.id.includes(targetId))) {
+      setSelectedEvent((prev) => (prev ? { ...prev, status: 'Resolved' } : null));
+    }
+    if (selectedAlert && (selectedAlert.id === targetId || selectedAlert.relatedEventId === targetId)) {
+      setSelectedAlert((prev) => (prev ? { ...prev, status: 'Resolved' } : null));
+    }
+
+    // 2. CRITICAL Events ONLY: prompt administrator for confirmation whether to block source IP
+    // For HIGH, MEDIUM, LOW, and INFO events: resolve quietly without prompting
+    if (isCritical) {
+      setIpBlockPrompt({
+        isOpen: true,
+        ipAddress: sourceIp,
+        sourceTitle: targetTitle,
+        eventId: targetId,
+        severity: targetSeverity || 'P1 Critical',
+      });
+    }
+  };
+
+  const resolveAlert = (id: string) => {
+    resolveEventOrAlert(id);
+  };
+
+  const confirmIpBlock = (shouldBlock: boolean) => {
+    if (!ipBlockPrompt) return;
+
+    const targetIp = ipBlockPrompt.ipAddress;
+
+    if (shouldBlock) {
+      setBlockedIps((prev) => (prev.includes(targetIp) ? prev : [...prev, targetIp]));
+      setBlockToastMessage(`IP ${targetIp} marked as Blocked (Simulated WAF Rule).`);
+      setTimeout(() => setBlockToastMessage(null), 5000);
+    }
+
+    setIpBlockPrompt(null);
   };
 
   const dismissAlert = (id: string) => {
@@ -213,6 +317,74 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       )
     );
   };
+
+  // Dynamic Cryptographic Audit Trail Verification
+  const auditVerification = verifyLogHashChain(logs);
+
+  const auditResult = {
+    isChainValid: auditVerification.isChainValid,
+    totalLogs: auditVerification.totalLogs,
+    verifiedCount: auditVerification.verifiedCount,
+    tamperedCount: auditVerification.tamperedCount,
+    tamperedLogIds: auditVerification.tamperedLogIds,
+  };
+
+  const tamperWithLog = (logId: string, newMessage?: string) => {
+    setLogs((prevLogs) => {
+      const updated = prevLogs.map((log) => {
+        if (log.id === logId) {
+          const tamperedMsg = newMessage || `${log.message} [UNAUTHORIZED EDIT / PAYLOAD TAMPERED]`;
+          return {
+            ...log,
+            message: tamperedMsg,
+          };
+        }
+        return log;
+      });
+      const verifiedResult = verifyLogHashChain(updated);
+      return verifiedResult.verifiedLogs;
+    });
+
+    if (selectedLog && selectedLog.id === logId) {
+      setSelectedLog((prev) =>
+        prev
+          ? {
+              ...prev,
+              message: newMessage || `${prev.message} [UNAUTHORIZED EDIT / PAYLOAD TAMPERED]`,
+              isTampered: true,
+              tamperReason: 'Cryptographic signature mismatch: Log message modified after hash signing',
+            }
+          : null
+      );
+    }
+  };
+
+  const recalculateAndSignChain = () => {
+    setLogs((prevLogs) => {
+      const hashBlocks = computeLogHashChain(prevLogs.map((l) => ({ id: l.id, raw: l.message, timestamp: l.timestamp })));
+      const reSigned = prevLogs.map((l, idx) => ({
+        ...l,
+        hash: hashBlocks[idx].hash,
+        prevHash: hashBlocks[idx].prevHash,
+        isTampered: false,
+        tamperReason: undefined,
+      }));
+      return reSigned;
+    });
+
+    if (selectedLog) {
+      setSelectedLog((prev) => (prev ? { ...prev, isTampered: false, tamperReason: undefined } : null));
+    }
+  };
+
+  const verifyCurrentLogs = () => {
+    setLogs((prev) => {
+      const verified = verifyLogHashChain(prev);
+      return verified.verifiedLogs;
+    });
+  };
+
+  const dismissBlockToast = () => setBlockToastMessage(null);
 
   return (
     <AppContext.Provider
@@ -252,12 +424,24 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         analysisResult,
         setAnalysisResult,
         metrics,
+        auditResult,
+        tamperWithLog,
+        recalculateAndSignChain,
+        verifyCurrentLogs,
+        blockedIps,
+        isIpBlocked,
+        ipBlockPrompt,
+        confirmIpBlock,
+        resolveEventOrAlert,
+        blockToastMessage,
+        dismissBlockToast,
       }}
     >
       {children}
     </AppContext.Provider>
   );
 };
+
 
 export const useApp = () => {
   const context = useContext(AppContext);

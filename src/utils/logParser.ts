@@ -192,9 +192,9 @@ export function parseAndClassifyLogFile(fileContent: string, fileName: string, f
       statusCode = 429;
     }
 
-    // Extract IP Address
-    const ipMatch = rawLine.match(/\b(?:\d{1,3}\.){3}\d{1,3}\b/);
-    const ipAddress = ipMatch ? ipMatch[0] : 'Internal / Unspecified IP';
+    // Extract IP Address (prioritizing explicit source_ip= parameter)
+    const sourceIpMatch = rawLine.match(/source_ip=([0-9a-fA-F.:]+)/i) || rawLine.match(/src_ip=([0-9a-fA-F.:]+)/i) || rawLine.match(/ip=([0-9a-fA-F.:]+)/i) || rawLine.match(/\b(?:\d{1,3}\.){3}\d{1,3}\b/);
+    const ipAddress = sourceIpMatch ? (sourceIpMatch[1] || sourceIpMatch[0]) : 'Internal / Unspecified IP';
 
     // Extract Endpoint
     const endpointMatch = rawLine.match(/(\/(?:api|v[1-9]|auth|tax|visa|cadastral|treasury|certs|user)[^\s,"]*)/i);
@@ -249,13 +249,19 @@ export function parseAndClassifyLogFile(fileContent: string, fileName: string, f
     else if (endpoint.includes('treasury') || lower.includes('treasury')) service = 'Public Treasury Settlement API';
     else if (endpoint.includes('cadastral') || lower.includes('land')) service = 'Land Registry & Cadastral DB';
 
-    // Extract latency from log line if available (e.g., "240ms" or "duration=240")
+    // Extract latency from log line if available
     const latencyMatch = rawLine.match(/\b(\d+)\s*ms\b/i) || rawLine.match(/duration[=:](\d+)/i);
     const responseTimeMs = latencyMatch ? parseInt(latencyMatch[1], 10) : 0;
 
-    // Extract timestamp if present in log line (ISO or syslog pattern)
+    // Extract timestamp if present in log line
     const timeMatch = rawLine.match(/\b\d{4}-\d{2}-\d{2}[T\s]\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})?\b/);
     const timestamp = timeMatch ? timeMatch[0] : new Date().toISOString();
+
+    // Ensure raw line message contains source_ip=... field explicitly for security events
+    let logMessage = rawLine;
+    if (!rawLine.toLowerCase().includes('source_ip=') && ipAddress !== 'Internal / Unspecified IP') {
+      logMessage = `${rawLine} source_ip=${ipAddress}`;
+    }
 
     parsedLogs.push({
       id: `parsed-log-${Date.now()}-${index}`,
@@ -263,10 +269,10 @@ export function parseAndClassifyLogFile(fileContent: string, fileName: string, f
       service,
       level,
       category,
-      message: rawLine, // PRESERVE ORIGINAL LOG MESSAGE EXACTLY
+      message: logMessage,
       statusCode,
       ipAddress,
-      location: ipMatch ? (ipAddress.startsWith('185') ? 'Tor Exit Node (DE)' : 'Extracted Host IP') : 'Internal Ingress',
+      location: sourceIpMatch ? (ipAddress.startsWith('185') ? 'Tor Exit Node (DE)' : ipAddress.startsWith('194') ? 'Moscow, RU' : ipAddress.startsWith('45') ? 'Warsaw, PL' : 'Extracted Host IP') : 'Internal Ingress',
       method,
       endpoint,
       responseTimeMs,
@@ -275,7 +281,7 @@ export function parseAndClassifyLogFile(fileContent: string, fileName: string, f
       aiSummary: `Rule match: ${category} (${threatVector}) detected on ${service}.`,
       threatVector,
       payloadJson: JSON.stringify({ raw_line: rawLine, ip: ipAddress, status: statusCode }, null, 2),
-      mitigationScript: level === 'CRITICAL' && ipMatch ? `govlog-cli waf block-ip ${ipAddress} --duration 72h` : undefined,
+      mitigationScript: level === 'CRITICAL' && sourceIpMatch ? `govlog-cli waf block-ip ${ipAddress} --duration 72h` : undefined,
     });
   });
 
@@ -291,6 +297,7 @@ export function parseAndClassifyLogFile(fileContent: string, fileName: string, f
     if (chainBlock) {
       l.hash = chainBlock.hash;
       l.prevHash = chainBlock.prevHash;
+      l.isTampered = false;
     }
 
     const mlRes = mlAnomalies.get(l.id);

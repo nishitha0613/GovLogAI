@@ -30,7 +30,7 @@ export const SecurityAlertsPage: React.FC = () => {
     logs,
     events, 
     alerts, 
-    resolveAlert, 
+    resolveEventOrAlert, 
     dismissAlert, 
     dismissEvent, 
     setCurrentRoute,
@@ -162,8 +162,8 @@ export const SecurityAlertsPage: React.FC = () => {
     { name: 'MEDIUM', count: mediumProblemCount, color: '#f59e0b' },
   ].filter(item => item.count > 0) : [];
 
-  const handleResolve = (id: string) => {
-    resolveAlert(id);
+  const handleResolve = (target: any) => {
+    resolveEventOrAlert(target);
   };
 
   const handleDismiss = (id: string, type: 'event' | 'alert') => {
@@ -181,7 +181,7 @@ export const SecurityAlertsPage: React.FC = () => {
       setPlaybookExecuted(true);
       if (inspectModalItem) {
         triggerRemediation(inspectModalItem.id);
-        resolveAlert(inspectModalItem.id);
+        resolveEventOrAlert(inspectModalItem);
       }
     }, 1200);
   };
@@ -516,7 +516,7 @@ export const SecurityAlertsPage: React.FC = () => {
                           {/* Resolve */}
                           {!isResolved && (
                             <button
-                              onClick={() => handleResolve(item.id)}
+                              onClick={() => handleResolve(item)}
                               className="px-2.5 py-1 rounded bg-emerald-950/80 hover:bg-emerald-900 text-emerald-400 border border-emerald-800/60 text-[11px] font-bold flex items-center gap-1 transition cursor-pointer"
                               title="Mark Incident as Resolved"
                             >

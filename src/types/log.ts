@@ -21,6 +21,8 @@ export interface LogEntry {
   mitigationScript?: string;
   hash?: string;
   prevHash?: string;
+  isTampered?: boolean;
+  tamperReason?: string;
   threatIntelFeed?: string;
 }
 

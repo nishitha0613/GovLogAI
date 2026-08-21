@@ -11,7 +11,7 @@ interface AlertCardProps {
 }
 
 export const AlertCard: React.FC<AlertCardProps> = ({ alert }) => {
-  const { resolveAlert, triggerRemediation } = useApp();
+  const { resolveEventOrAlert, triggerRemediation } = useApp();
 
   const isResolved = alert.status === 'Resolved';
   const isP1 = alert.severity.includes('P1');
@@ -70,7 +70,7 @@ export const AlertCard: React.FC<AlertCardProps> = ({ alert }) => {
               <Button
                 variant="secondary"
                 size="sm"
-                onClick={() => resolveAlert(alert.id)}
+                onClick={() => resolveEventOrAlert(alert)}
                 icon={<CheckCircle className="w-3.5 h-3.5 text-emerald-400" />}
               >
                 Mark Resolved
