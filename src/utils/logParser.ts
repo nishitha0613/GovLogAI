@@ -228,12 +228,12 @@ export function parseAndClassifyLogFile(fileContent: string, fileName: string, f
       category = 'Network';
     }
 
-    // Exact Severity Detection from Actual Log Level
+    // Exact Severity Detection from Actual Log Level in text
     let level: LogLevel = 'INFO';
-    if (lower.includes('critical') || lower.includes('fatal') || threatVector === 'SQL Injection' || lower.includes('alg: none')) {
+    if (lower.includes('critical')) {
       level = 'CRITICAL';
       criticalCount += 1;
-    } else if (lower.includes('error') || (statusCode >= 500 && !lower.includes('info') && !lower.includes('warn'))) {
+    } else if (lower.includes('fatal') || lower.includes('error') || (statusCode >= 500 && !lower.includes('info') && !lower.includes('warn'))) {
       level = 'ERROR';
       errorCount += 1;
     } else if (lower.includes('warn') || statusCode === 429) {

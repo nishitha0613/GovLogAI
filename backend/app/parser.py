@@ -70,9 +70,9 @@ def parse_log_line(raw_line: str):
 
     # Severity Level
     level = "INFO"
-    if "critical" in lower_line or "fatal" in lower_line or threat_vector == "SQL Injection":
+    if "critical" in lower_line:
         level = "CRITICAL"
-    elif "error" in lower_line or status_code >= 500:
+    elif "fatal" in lower_line or "error" in lower_line or status_code >= 500:
         level = "ERROR"
     elif "warn" in lower_line or status_code == 429:
         level = "WARN"

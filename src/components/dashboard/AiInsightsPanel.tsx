@@ -24,7 +24,7 @@ export const AiInsightsPanel: React.FC = () => {
     }
   });
 
-  const hasCritical = logs.some((l) => l.level === 'CRITICAL' || l.level === 'FATAL') || events.some((e) => e.severity === 'P1 Critical');
+  const hasCritical = logs.some((l) => l.level === 'CRITICAL');
   const hasError = logs.some((l) => l.level === 'ERROR') || events.some((e) => e.severity === 'P2 High');
   const highestSeverity = logs.length > 0 ? (hasCritical ? 'CRITICAL (P1)' : hasError ? 'ERROR (P2)' : 'WARN (P3)') : 'N/A';
 

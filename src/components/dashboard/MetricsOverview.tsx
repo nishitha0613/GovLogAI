@@ -7,7 +7,7 @@ export const MetricsOverview: React.FC = () => {
   const { logs, alerts, events } = useApp();
 
   const totalLogsCount = logs.length;
-  const criticalEventsCount = logs.filter(l => l.level === 'CRITICAL' || l.level === 'FATAL').length + events.filter(e => e.severity === 'P1 Critical').length;
+  const criticalEventsCount = logs.filter(l => l.level === 'CRITICAL').length;
   const warningsCount = logs.filter(l => l.level === 'WARN').length;
   const activeAlertsCount = alerts.filter(a => a.status === 'Open' || a.status === 'Investigating').length;
   const resolvedEventsCount = events.filter(e => e.status === 'Resolved' || e.status === 'Mitigated').length + alerts.filter(a => a.status === 'Resolved').length;
@@ -26,9 +26,9 @@ export const MetricsOverview: React.FC = () => {
     },
     {
       id: 'kpi-critical',
-      title: 'Critical Events',
+      title: 'Critical Security Events',
       value: criticalEventsCount.toString(),
-      subText: `${events.length} Incident Groups`,
+      subText: `${events.length} Correlated Groups`,
       trend: criticalEventsCount > 0 ? 'P1 Active' : 'Optimal',
       trendUp: false,
       icon: <ShieldAlert className="w-4 h-4 text-rose-400" />,

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Database, AlertTriangle, ShieldAlert, Bell, BarChart3, PieChart as PieIcon, ArrowRight } from 'lucide-react';
+import { BarChart3, PieChart as PieIcon, ArrowRight } from 'lucide-react';
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid, PieChart, Pie, Cell, Legend } from 'recharts';
 import { useApp } from '../../context/AppContext';
 import { Card } from '../ui/Card';
@@ -12,13 +12,9 @@ const LEVEL_COLORS: Record<string, string> = {
 };
 
 export const AnalyticsPage: React.FC = () => {
-  const { logs, events, alerts, setCurrentRoute } = useApp();
+  const { logs, setCurrentRoute } = useApp();
 
   const totalLogs = logs.length;
-  const errorLogsCount = logs.filter(l => l.level === 'ERROR' || l.statusCode >= 500).length;
-  const errorRatePercent = totalLogs > 0 ? ((errorLogsCount / totalLogs) * 100).toFixed(1) : '0.0';
-  const criticalCount = events.filter(e => e.severity === 'P1 Critical').length + logs.filter(l => l.level === 'CRITICAL' || l.level === 'FATAL').length;
-  const activeAlertsCount = alerts.filter(a => a.status === 'Open' || a.status === 'Investigating').length;
 
   // Real log volume trend grouping over time buckets strictly from uploaded log timestamps
   const timeBucketsMap = new Map<string, { time: string; count: number; errors: number; criticals: number }>();
@@ -72,58 +68,7 @@ export const AnalyticsPage: React.FC = () => {
 
   return (
     <div className="p-4 md:p-6 max-w-[1500px] mx-auto space-y-6 font-sans">
-      {/* 1. Core Key Metrics Row (4 Cards) */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 font-mono text-xs">
-        {/* Total Logs Processed */}
-        <Card className="bg-[#0c121e]/90 border border-slate-800/80 p-5 rounded-xl flex items-center justify-between shadow-sm">
-          <div>
-            <div className="text-slate-400 font-sans text-xs font-medium">Total Logs Processed</div>
-            <div className="text-3xl font-extrabold text-white mt-1">{totalLogs.toLocaleString()}</div>
-            <div className="text-[11px] text-slate-500 mt-1 font-mono">{totalLogs > 0 ? `${totalLogs} buffer lines loaded` : 'No log buffer active'}</div>
-          </div>
-          <div className="p-3 rounded-xl bg-cyan-950/60 border border-cyan-800/60 text-cyan-400">
-            <Database className="w-6 h-6" />
-          </div>
-        </Card>
-
-        {/* Error Count */}
-        <Card className="bg-[#0c121e]/90 border border-slate-800/80 p-5 rounded-xl flex items-center justify-between shadow-sm">
-          <div>
-            <div className="text-slate-400 font-sans text-xs font-medium font-mono">Errors ({errorRatePercent}%)</div>
-            <div className="text-3xl font-extrabold text-amber-400 mt-1">{errorLogsCount.toLocaleString()}</div>
-            <div className="text-[11px] text-slate-500 mt-1 font-mono">ERROR level log entries</div>
-          </div>
-          <div className="p-3 rounded-xl bg-amber-950/60 border border-amber-800/60 text-amber-400">
-            <AlertTriangle className="w-6 h-6" />
-          </div>
-        </Card>
-
-        {/* Critical Events */}
-        <Card className="bg-[#0c121e]/90 border border-slate-800/80 p-5 rounded-xl flex items-center justify-between shadow-sm">
-          <div>
-            <div className="text-slate-400 font-sans text-xs font-medium">Critical Security Events</div>
-            <div className="text-3xl font-extrabold text-rose-400 mt-1">{criticalCount}</div>
-            <div className="text-[11px] text-slate-500 mt-1 font-mono">{events.length} correlated incident groups</div>
-          </div>
-          <div className="p-3 rounded-xl bg-rose-950/60 border border-rose-800/60 text-rose-400">
-            <ShieldAlert className="w-6 h-6" />
-          </div>
-        </Card>
-
-        {/* Active Alerts */}
-        <Card className="bg-[#0c121e]/90 border border-slate-800/80 p-5 rounded-xl flex items-center justify-between shadow-sm">
-          <div>
-            <div className="text-slate-400 font-sans text-xs font-medium">Active Alerts</div>
-            <div className="text-3xl font-extrabold text-purple-400 mt-1">{activeAlertsCount}</div>
-            <div className="text-[11px] text-slate-500 mt-1 font-mono">{alerts.length} total alert queue</div>
-          </div>
-          <div className="p-3 rounded-xl bg-purple-950/60 border border-purple-800/60 text-purple-400">
-            <Bell className="w-6 h-6" />
-          </div>
-        </Card>
-      </div>
-
-      {/* 2. Log Volume & Error/Critical Trend Over Time (Area Chart) */}
+      {/* 1. Log Volume & Error/Critical Trend Over Time (Area Chart) */}
       <Card className="bg-[#0c121e]/90 border border-slate-800/80 p-5 rounded-xl space-y-4 shadow-sm">
         <div className="flex items-center justify-between pb-3 border-b border-slate-800/80">
           <div className="flex items-center gap-2">

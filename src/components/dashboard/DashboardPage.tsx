@@ -5,10 +5,10 @@ import { Card } from '../ui/Card';
 import { Badge } from '../ui/Badge';
 
 export const DashboardPage: React.FC = () => {
-  const { logs, events, setCurrentRoute } = useApp();
+  const { logs, setCurrentRoute } = useApp();
 
   const totalLogs = logs.length;
-  const criticalCount = events.filter(e => e.severity.includes('P1') || e.severity.includes('Critical')).length;
+  const criticalCount = logs.filter(l => l.level === 'CRITICAL').length;
 
   return (
     <div className="p-4 md:p-6 max-w-[1200px] mx-auto space-y-6 font-sans">

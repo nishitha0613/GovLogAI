@@ -109,8 +109,8 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   const infoCount = logs.filter((l) => l.level === 'INFO').length;
   const warnCount = logs.filter((l) => l.level === 'WARN').length;
   const errorCount = logs.filter((l) => l.level === 'ERROR').length;
-  const criticalCount = logs.filter((l) => l.level === 'CRITICAL' || l.level === 'FATAL').length;
-  const criticalEventsCount = events.filter((e) => e.severity === 'P1 Critical').length;
+  const criticalCount = logs.filter((l) => l.level === 'CRITICAL').length;
+  const criticalEventsCount = criticalCount;
   const correlatedEventGroupsCount = events.length;
 
   const metrics: LogMetrics = {

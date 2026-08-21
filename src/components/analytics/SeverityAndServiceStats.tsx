@@ -13,7 +13,7 @@ export const SeverityAndServiceStats: React.FC = () => {
   const infoCount = logs.filter(l => l.level === 'INFO').length;
   const warnCount = logs.filter(l => l.level === 'WARN').length;
   const errorCount = logs.filter(l => l.level === 'ERROR').length;
-  const criticalCount = logs.filter(l => l.level === 'CRITICAL' || l.level === 'FATAL').length;
+  const criticalCount = logs.filter(l => l.level === 'CRITICAL').length;
 
   const severityData = total > 0 ? [
     { name: 'INFO', count: infoCount, percentage: `${Math.round((infoCount / total) * 100)}%`, color: '#10b981' },
