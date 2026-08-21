@@ -6,11 +6,12 @@ import { LogUploader } from './LogUploader';
 import { LogAnalysisSummary } from './LogAnalysisSummary';
 import { RawLogTerminal } from './RawLogTerminal';
 import { LogFilters } from './LogFilters';
+import { AuditTrailBanner } from './AuditTrailBanner';
 import { LogTable } from './LogTable';
 import { AiLogInspector } from './AiLogInspector';
 
 export const LogsPage: React.FC = () => {
-  const { searchQuery, analysisResult, setAnalysisResult } = useApp();
+  const { searchQuery, analysisResult, setAnalysisResult, logs } = useApp();
   const [selectedLevel, setSelectedLevel] = useState<LogLevel | 'ALL'>('ALL');
   const [selectedService, setSelectedService] = useState<string>('ALL');
   const [selectedStatusCode, setSelectedStatusCode] = useState<string>('ALL');
@@ -20,7 +21,7 @@ export const LogsPage: React.FC = () => {
     setAnalysisResult(result);
   };
 
-  const activeLogsToFilter: LogEntry[] = analysisResult ? analysisResult.logs : [];
+  const activeLogsToFilter: LogEntry[] = logs && logs.length > 0 ? logs : (analysisResult ? analysisResult.logs : []);
 
   // Filter logic
   const filteredLogs = activeLogsToFilter.filter((log) => {
@@ -64,6 +65,7 @@ export const LogsPage: React.FC = () => {
 
       {/* 4. Filters & Classified Logs Table */}
       <div className="space-y-4">
+        <AuditTrailBanner />
         <LogFilters
           selectedLevel={selectedLevel}
           setSelectedLevel={setSelectedLevel}
@@ -71,9 +73,9 @@ export const LogsPage: React.FC = () => {
           setSelectedService={setSelectedService}
           selectedStatusCode={selectedStatusCode}
           setSelectedStatusCode={setSelectedStatusCode}
-          availableServices={analysisResult ? Array.from(new Set(analysisResult.logs.map(l => l.service))) : []}
+          availableServices={activeLogsToFilter.length > 0 ? Array.from(new Set(activeLogsToFilter.map(l => l.service))) : []}
         />
-        <LogTable logs={filteredLogs} hasProcessedLogs={!!analysisResult} />
+        <LogTable logs={filteredLogs} hasProcessedLogs={activeLogsToFilter.length > 0} />
       </div>
 
       {/* Interactive AI Inspector Side Drawer */}
@@ -81,3 +83,4 @@ export const LogsPage: React.FC = () => {
     </div>
   );
 };
+

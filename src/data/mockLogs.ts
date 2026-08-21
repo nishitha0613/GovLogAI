@@ -1,13 +1,14 @@
 import type { LogEntry } from '../types/log';
+import { computeLogHashChain } from '../utils/cryptoHasher';
 
-export const mockLogEntries: LogEntry[] = [
+const rawMockEntries: LogEntry[] = [
   {
     id: 'log-1001',
     timestamp: '2026-08-20T14:26:45.102Z',
     service: 'Border Control & Visa Gateway',
     level: 'CRITICAL',
     category: 'Biometrics',
-    message: 'SQL Injection attempt detected in visa passport lookup API payload',
+    message: 'SQL Injection attempt detected in visa passport lookup API payload endpoint=/api/v2/visa/verify-passport source_ip=185.220.101.44',
     statusCode: 403,
     ipAddress: '185.220.101.44',
     location: 'Frankfurt, DE (Tor Exit Node)',
@@ -21,7 +22,8 @@ export const mockLogEntries: LogEntry[] = [
     payloadJson: JSON.stringify({
       passport_no: "' UNION SELECT 1, citizen_ssn, biometric_hash FROM citizen_db.master_identity --",
       request_origin: "api-client-v1.4",
-      user_agent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) GovHack/3.1"
+      user_agent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) GovHack/3.1",
+      source_ip: "185.220.101.44"
     }, null, 2),
     mitigationScript: `# Auto-Generated GovLogAI Mitigation Playbook
 govlog-cli waf block-ip 185.220.101.44 --duration 72h --reason "SQLi attack on Border Gateway"
@@ -33,7 +35,7 @@ kubectl scale deployment/border-visa-gateway --replicas=16 -n egov-border`
     service: 'National Identity Gateway (GovID)',
     level: 'WARN',
     category: 'Authentication',
-    message: 'Abnormal authentication rate spike detected for citizen login portal',
+    message: 'Abnormal authentication rate spike detected for citizen login portal endpoint=/api/v1/auth/mfa-verify source_ip=194.26.29.112',
     statusCode: 429,
     ipAddress: '194.26.29.112',
     location: 'Moscow, RU',
@@ -47,7 +49,8 @@ kubectl scale deployment/border-visa-gateway --replicas=16 -n egov-border`
     payloadJson: JSON.stringify({
       citizen_id: "NAT-ID-88402911",
       mfa_token: "994012",
-      attempt_count: 45
+      attempt_count: 45,
+      source_ip: "194.26.29.112"
     }, null, 2),
     mitigationScript: `govlog-cli rate-limit set --endpoint "/api/v1/auth/mfa-verify" --max-requests 5 --window 60s
 govlog-cli mfa enforce-captcha --tier strict`
@@ -58,7 +61,7 @@ govlog-cli mfa enforce-captcha --tier strict`
     service: 'Central Tax & Revenue Gateway',
     level: 'ERROR',
     category: 'Database Query',
-    message: 'Database connection pool exhausted during peak tax return submission',
+    message: 'Database connection pool exhausted during peak tax return submission endpoint=/api/v3/tax/submit-annual-return source_ip=10.240.12.89',
     statusCode: 500,
     ipAddress: '10.240.12.89',
     location: 'Internal Pod (K8s Cluster East-1)',
@@ -73,7 +76,8 @@ govlog-cli mfa enforce-captcha --tier strict`
       tax_year: 2026,
       filing_type: "corporate_annual",
       db_wait_time_ms: 2400,
-      active_connections: 250
+      active_connections: 250,
+      source_ip: "10.240.12.89"
     }, null, 2),
     mitigationScript: `kubectl patch deployment/tax-revenue-gateway -n egov-tax --patch '{"spec":{"template":{"spec":{"containers":[{"name":"app","env":[{"name":"DB_POOL_MAX","value":"500"}]}]}}}}'
 govlog-cli db exec-query "REINDEX TABLE corporate_filings;"`
@@ -84,7 +88,7 @@ govlog-cli db exec-query "REINDEX TABLE corporate_filings;"`
     service: 'National Health Exchange (EHR)',
     level: 'INFO',
     category: 'API Security',
-    message: 'Authorized medical record query by National Hospital Central Node',
+    message: 'Authorized medical record query by National Hospital Central Node endpoint=/api/v1/patients/EHR-992014/summary source_ip=10.128.4.15',
     statusCode: 200,
     ipAddress: '10.128.4.15',
     location: 'GovNet Private VPN Node #4',
@@ -98,7 +102,8 @@ govlog-cli db exec-query "REINDEX TABLE corporate_filings;"`
     payloadJson: JSON.stringify({
       practitioner_id: "MD-GOV-44810",
       facility_code: "HOSP-CENTRAL-01",
-      saml_session_valid: true
+      saml_session_valid: true,
+      source_ip: "10.128.4.15"
     }, null, 2),
     mitigationScript: `# No action required. Audit log entry recorded.`
   },
@@ -108,7 +113,7 @@ govlog-cli db exec-query "REINDEX TABLE corporate_filings;"`
     service: 'Land Registry & Cadastral DB',
     level: 'WARN',
     category: 'API Security',
-    message: 'Unusual bulk download request of property title GIS boundaries',
+    message: 'Unusual bulk download request of property title GIS boundaries endpoint=/api/v2/cadastral/spatial-export source_ip=103.21.244.78',
     statusCode: 200,
     ipAddress: '103.21.244.78',
     location: 'Singapore, SG',
@@ -122,7 +127,8 @@ govlog-cli db exec-query "REINDEX TABLE corporate_filings;"`
     payloadJson: JSON.stringify({
       api_key_id: "vendor_key_99201",
       records_requested: 10000,
-      daily_usage_percentage: 92.4
+      daily_usage_percentage: 92.4,
+      source_ip: "103.21.244.78"
     }, null, 2),
     mitigationScript: `govlog-cli quota-enforce --key "vendor_key_99201" --throttle 50
 govlog-cli audit alert --channel secops-slack --msg "Potential land data scraping detected"`
@@ -133,7 +139,7 @@ govlog-cli audit alert --channel secops-slack --msg "Potential land data scrapin
     service: 'Public Treasury Settlement API',
     level: 'CRITICAL',
     category: 'Privilege Escalation',
-    message: 'Privilege escalation attempt on treasury disbursement approval endpoint',
+    message: 'Privilege escalation attempt on treasury disbursement approval endpoint=/api/v1/treasury/authorize-disbursement source_ip=45.154.255.89',
     statusCode: 401,
     ipAddress: '45.154.255.89',
     location: 'Warsaw, PL',
@@ -146,7 +152,8 @@ govlog-cli audit alert --channel secops-slack --msg "Potential land data scrapin
     threatVector: 'CWE-347: Improper Verification of Cryptographic Signature',
     payloadJson: JSON.stringify({
       token_header: { alg: "none", typ: "JWT" },
-      claim: { role: "Chief_Treasury_Auditor", disbursement_id: "DISB-2026-991204", amount: "$4,500,000" }
+      claim: { role: "Chief_Treasury_Auditor", disbursement_id: "DISB-2026-991204", amount: "$4,500,000" },
+      source_ip: "45.154.255.89"
     }, null, 2),
     mitigationScript: `govlog-cli jwt-policy enforce --disallow-none-alg true
 govlog-cli incident trigger --severity P1 --title "CRITICAL: JWT Forgery on Treasury"
@@ -158,7 +165,7 @@ govlog-cli firewall block-ip 45.154.255.89`
     service: 'Border Control & Visa Gateway',
     level: 'FATAL',
     category: 'Biometrics',
-    message: 'Border node biometric matcher daemon lost connection to HSM key vault',
+    message: 'Border node biometric matcher daemon lost connection to HSM key vault endpoint=/api/v2/biometrics/match-iris source_ip=10.250.0.12',
     statusCode: 503,
     ipAddress: '10.250.0.12',
     location: 'Border Checkpoint International Terminal 1',
@@ -172,7 +179,8 @@ govlog-cli firewall block-ip 45.154.255.89`
     payloadJson: JSON.stringify({
       hsm_endpoint: "hsm-vault-cluster.gov.internal:8443",
       error_code: "ETIMEDOUT",
-      failover_status: "STANDBY_NODE_SYNCING"
+      failover_status: "STANDBY_NODE_SYNCING",
+      source_ip: "10.250.0.12"
     }, null, 2),
     mitigationScript: `govlog-cli hsm-failover --target hsm-vault-cluster-backup.gov.internal
 kubectl rollout restart deployment/biometric-matcher -n egov-border`
@@ -183,7 +191,7 @@ kubectl rollout restart deployment/biometric-matcher -n egov-border`
     service: 'National Identity Gateway (GovID)',
     level: 'INFO',
     category: 'System Maintenance',
-    message: 'Batch citizen digital certificate renewal completed successfully',
+    message: 'Batch citizen digital certificate renewal completed successfully endpoint=/api/v1/certs/cron-renew-batch source_ip=10.128.0.5',
     statusCode: 200,
     ipAddress: '10.128.0.5',
     location: 'GovCloud Master Node 1',
@@ -197,8 +205,19 @@ kubectl rollout restart deployment/biometric-matcher -n egov-border`
     payloadJson: JSON.stringify({
       certs_processed: 1250,
       expired: 0,
-      renewed: 1250
+      renewed: 1250,
+      source_ip: "10.128.0.5"
     }, null, 2),
     mitigationScript: `# Routine job execution completed successfully.`
   }
 ];
+
+// Pre-compute cryptographic hash chain for mock logs
+const hashChainBlocks = computeLogHashChain(rawMockEntries.map((l) => ({ id: l.id, raw: l.message, timestamp: l.timestamp })));
+
+export const mockLogEntries: LogEntry[] = rawMockEntries.map((l, index) => ({
+  ...l,
+  hash: hashChainBlocks[index].hash,
+  prevHash: hashChainBlocks[index].prevHash,
+  isTampered: false,
+}));

@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
-import { Sparkles, ShieldAlert, Copy, Check, Code, Play, Zap } from 'lucide-react';
+import { Sparkles, ShieldAlert, ShieldCheck, AlertTriangle, RefreshCw, Copy, Check, Code, Play, Zap } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { Modal } from '../ui/Modal';
 import { Badge } from '../ui/Badge';
 import { Button } from '../ui/Button';
 
 export const AiLogInspector: React.FC = () => {
-  const { selectedLog, setSelectedLog } = useApp();
+  const { selectedLog, setSelectedLog, tamperWithLog, recalculateAndSignChain } = useApp();
+
   const [copied, setCopied] = useState(false);
   const [executed, setExecuted] = useState(false);
 
@@ -84,6 +85,118 @@ export const AiLogInspector: React.FC = () => {
           <div className="p-3 rounded-lg bg-slate-900 border border-slate-800">
             <div className="text-slate-500 mb-0.5">Response Time</div>
             <div className="text-emerald-400 font-bold">{selectedLog.responseTimeMs} ms</div>
+          </div>
+        </div>
+
+        {/* Cryptographic Audit Trail Inspector Card */}
+        <div className={`p-4 rounded-xl border font-mono space-y-4 ${
+          selectedLog.isTampered
+            ? 'bg-rose-950/40 border-rose-800/80 text-rose-200'
+            : 'bg-slate-900/90 border-emerald-900/60 text-slate-200'
+        }`}>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wide">
+              {selectedLog.isTampered ? (
+                <ShieldAlert className="w-4 h-4 text-rose-400" />
+              ) : (
+                <ShieldCheck className="w-4 h-4 text-emerald-400" />
+              )}
+              <span>Cryptographic Audit Trail & SHA-256 Hash Chain</span>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <span className={`px-2.5 py-1 rounded text-xs font-bold ${
+                selectedLog.isTampered
+                  ? 'bg-rose-900/80 text-rose-300 border border-rose-700'
+                  : 'bg-emerald-900/60 text-emerald-300 border border-emerald-700'
+              }`}>
+                {selectedLog.isTampered ? 'TAMPERED / CHAIN BROKEN' : 'VERIFIED (TAMPER-PROOF)'}
+              </span>
+            </div>
+          </div>
+
+          {/* Mismatch Warning Alert if Tampered */}
+          {selectedLog.isTampered && (
+            <div className="p-3 rounded-lg bg-rose-950 border border-rose-800 text-xs text-rose-300 space-y-1">
+              <div className="font-bold flex items-center gap-1.5 text-rose-200">
+                <AlertTriangle className="w-4 h-4 text-rose-400" />
+                <span>Audit Chain Integrity Warning:</span>
+              </div>
+              <p className="font-sans text-rose-200/90">
+                {selectedLog.tamperReason || 'Log event message payload does not match stored SHA-256 signature block.'}
+              </p>
+            </div>
+          )}
+
+          {/* Hashes Detail Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
+            <div className="p-3 rounded-lg bg-slate-950 border border-slate-800 space-y-1">
+              <div className="text-slate-500 text-[11px] font-bold uppercase flex items-center justify-between">
+                <span>Current SHA-256 Block Hash:</span>
+                <button
+                  onClick={() => {
+                    if (selectedLog.hash) navigator.clipboard.writeText(selectedLog.hash);
+                  }}
+                  className="text-cyan-400 hover:text-white text-[10px]"
+                >
+                  Copy
+                </button>
+              </div>
+              <div className="text-emerald-400 font-mono text-[11px] break-all select-all font-semibold">
+                {selectedLog.hash || 'SHA256-PENDING'}
+              </div>
+            </div>
+
+            <div className="p-3 rounded-lg bg-slate-950 border border-slate-800 space-y-1">
+              <div className="text-slate-500 text-[11px] font-bold uppercase flex items-center justify-between">
+                <span>Previous Block Hash (prevHash):</span>
+                <button
+                  onClick={() => {
+                    if (selectedLog.prevHash) navigator.clipboard.writeText(selectedLog.prevHash);
+                  }}
+                  className="text-cyan-400 hover:text-white text-[10px]"
+                >
+                  Copy
+                </button>
+              </div>
+              <div className="text-cyan-400 font-mono text-[11px] break-all select-all font-semibold">
+                {selectedLog.prevHash || '0000000000000000000000000000000000000000000000000000000000000000'}
+              </div>
+            </div>
+          </div>
+
+          {/* Payload String Input */}
+          <div className="text-[11px] text-slate-400 space-y-1">
+            <div className="text-slate-400 font-bold">Cryptographic Payload Input Stream:</div>
+            <div className="p-2 rounded bg-slate-950 border border-slate-800 font-mono text-slate-300 text-[10px] break-all">
+              {`${selectedLog.prevHash || 'GENESIS'}|${selectedLog.id}|${selectedLog.timestamp}|${selectedLog.message}`}
+            </div>
+          </div>
+
+          {/* Interactive Test Controls */}
+          <div className="flex items-center justify-between pt-1 border-t border-slate-800 text-xs">
+            <span className="text-slate-400 text-[11px]">Audit Engine Interactive Controls:</span>
+            <div className="flex items-center gap-2">
+              {!selectedLog.isTampered ? (
+                <button
+                  onClick={() => tamperWithLog(selectedLog.id)}
+                  className="px-2.5 py-1 rounded bg-rose-950 hover:bg-rose-900 border border-rose-800 text-rose-300 text-[11px] transition flex items-center gap-1 cursor-pointer"
+                  title="Simulate unauthorized message edit to test tamper detection"
+                >
+                  <AlertTriangle className="w-3.5 h-3.5 text-rose-400" />
+                  Simulate Log Tampering
+                </button>
+              ) : (
+                <button
+                  onClick={recalculateAndSignChain}
+                  className="px-2.5 py-1 rounded bg-emerald-950 hover:bg-emerald-900 border border-emerald-800 text-emerald-300 text-[11px] transition flex items-center gap-1 cursor-pointer"
+                  title="Re-sign cryptographic hash chain and restore verified status"
+                >
+                  <RefreshCw className="w-3.5 h-3.5 text-emerald-400" />
+                  Re-Sign Hash Chain
+                </button>
+              )}
+            </div>
           </div>
         </div>
 

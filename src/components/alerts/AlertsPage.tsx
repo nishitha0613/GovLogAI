@@ -7,6 +7,7 @@ import { AlertFilters } from './AlertFilters';
 import { AlertTable } from './AlertTable';
 import { AlertDetailModal } from './AlertDetailModal';
 import { AlertRuleModal } from './AlertRuleModal';
+import { ResolveBlockIpModal } from './ResolveBlockIpModal';
 import { Button } from '../ui/Button';
 
 export const AlertsPage: React.FC = () => {
@@ -113,6 +114,9 @@ export const AlertsPage: React.FC = () => {
         isOpen={isRuleModalOpen}
         onClose={() => setIsRuleModalOpen(false)}
       />
+
+      {/* CRITICAL Event Resolve -> Block IP Prompt Modal */}
+      <ResolveBlockIpModal />
     </div>
   );
 };

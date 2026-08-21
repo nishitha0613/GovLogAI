@@ -1,5 +1,5 @@
 import React from 'react';
-import { ChevronRight, Download, Sparkles, FileText } from 'lucide-react';
+import { ChevronRight, Download, Sparkles, FileText, ShieldCheck, ShieldAlert } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import type { LogEntry } from '../../types/log';
 import { Badge } from '../ui/Badge';
@@ -22,6 +22,7 @@ export const LogTable: React.FC<LogTableProps> = ({ logs, hasProcessedLogs = fal
     downloadAnchor.click();
     downloadAnchor.remove();
   };
+
 
   return (
     <Card className="bg-[#0c121e]/90 border border-slate-800/80 p-0 overflow-hidden font-mono text-xs shadow-sm">
@@ -146,11 +147,22 @@ export const LogTable: React.FC<LogTableProps> = ({ logs, hasProcessedLogs = fal
                       </div>
                     </td>
 
-                    <td className="py-2.5 px-3.5 whitespace-nowrap font-mono text-[10px] text-slate-400" title={log.hash || 'SHA-256 Audit Block Hash'}>
-                      <div className="flex items-center gap-1">
-                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0" title="Tamper-proof hash verified" />
-                        <span className="text-slate-300 font-bold">{log.hash ? `${log.hash.slice(0, 10)}...` : 'SHA256-PENDING'}</span>
-                      </div>
+                    <td className="py-2.5 px-3.5 whitespace-nowrap font-mono text-[10px]">
+                      {log.isTampered ? (
+                        <div className="flex items-center gap-1.5" title={log.tamperReason || 'Cryptographic hash mismatch / Tamper detected'}>
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-rose-950/80 border border-rose-700/80 text-rose-300 font-bold text-[10px]">
+                            <ShieldAlert className="w-3 h-3 text-rose-400 shrink-0" />
+                            TAMPERED
+                          </span>
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-1.5" title={`SHA-256 Verified Block: ${log.hash || 'SHA256-PENDING'}`}>
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-emerald-950/60 border border-emerald-800/60 text-emerald-300 font-semibold text-[10px]">
+                            <ShieldCheck className="w-3 h-3 text-emerald-400 shrink-0" />
+                            {log.hash ? `${log.hash.slice(0, 8)}...` : 'VERIFIED'}
+                          </span>
+                        </div>
+                      )}
                     </td>
 
                     <td className="py-2.5 px-3.5 text-right whitespace-nowrap">

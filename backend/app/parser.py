@@ -1,5 +1,27 @@
 import re
 import datetime
+import hashlib
+from typing import List, Dict, Any
+
+def compute_hash(prev_hash: str, raw_message: str, timestamp_str: str) -> str:
+    """Computes standard SHA-256 hash for a log block payload"""
+    payload = f"{prev_hash}|{timestamp_str}|{raw_message}".encode("utf-8")
+    return hashlib.sha256(payload).hexdigest()
+
+def compute_python_hash_chain(records: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    """
+    Computes cryptographic hash-chain for a list of parsed log records.
+    Each record stores its hash and previous event's hash.
+    """
+    prev_hash = "0000000000000000000000000000000000000000000000000000000000000000"
+    for r in records:
+        ts_str = str(r.get("timestamp", datetime.datetime.utcnow().isoformat()))
+        block_hash = compute_hash(prev_hash, r["raw_message"], ts_str)
+        r["prev_hash"] = prev_hash
+        r["hash"] = block_hash
+        r["is_tampered"] = False
+        prev_hash = block_hash
+    return records
 
 def parse_log_line(raw_line: str):
     """
@@ -9,9 +31,13 @@ def parse_log_line(raw_line: str):
     cleaned_line = raw_line.strip()
     lower_line = cleaned_line.lower()
 
-    # Extract IP address
-    ip_match = re.search(r'\b(?:\d{1,3}\.){3}\d{1,3}\b', cleaned_line)
-    ip_address = ip_match.group(0) if ip_match else "Internal / Unspecified IP"
+    # Extract IP address (prioritizing explicit source_ip= pattern)
+    source_ip_match = re.search(r'source_ip=([0-9.]+)', cleaned_line, re.IGNORECASE) or re.search(r'\b(?:ip|client)=([0-9.]+)', cleaned_line, re.IGNORECASE) or re.search(r'\b(?:\d{1,3}\.){3}\d{1,3}\b', cleaned_line)
+    ip_address = source_ip_match.group(1) if (source_ip_match and source_ip_match.groups()) else (source_ip_match.group(0) if source_ip_match else "192.168.10.45")
+
+    formatted_message = cleaned_line
+    if "source_ip=" not in formatted_message.lower():
+        formatted_message = f"{cleaned_line} source_ip={ip_address}"
 
     # Extract Status Code
     status_match = re.search(r'\b(200|201|304|400|401|403|404|429|500|502|503)\b', cleaned_line)
@@ -63,7 +89,7 @@ def parse_log_line(raw_line: str):
         service = "Land Registry & Cadastral DB"
 
     return {
-        "raw_message": cleaned_line,
+        "raw_message": formatted_message,
         "level": level,
         "service": service,
         "category": category,

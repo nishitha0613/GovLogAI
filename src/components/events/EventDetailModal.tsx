@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Flame, Sparkles, Terminal, Play, Zap, Copy, Check, ChevronRight } from 'lucide-react';
+import { Flame, Sparkles, Terminal, Play, Zap, Copy, Check, ChevronRight, ShieldCheck, ShieldAlert } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { Modal } from '../ui/Modal';
 import { Badge } from '../ui/Badge';
@@ -139,6 +139,15 @@ export const EventDetailModal: React.FC = () => {
                   <span className="text-slate-400">IP: {log.ipAddress}</span>
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
+                  {log.isTampered ? (
+                    <span className="px-2 py-0.5 rounded bg-rose-950 border border-rose-800 text-rose-300 font-bold text-[10px] flex items-center gap-1">
+                      <ShieldAlert className="w-3 h-3 text-rose-400" /> Tampered
+                    </span>
+                  ) : (
+                    <span className="px-2 py-0.5 rounded bg-emerald-950 border border-emerald-800 text-emerald-300 font-medium text-[10px] flex items-center gap-1">
+                      <ShieldCheck className="w-3 h-3 text-emerald-400" /> Verified Hash
+                    </span>
+                  )}
                   <span className="text-rose-400 font-bold">{log.statusCode}</span>
                   <ChevronRight className="w-4 h-4 text-cyan-400" />
                 </div>

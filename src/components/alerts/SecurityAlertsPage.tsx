@@ -24,6 +24,7 @@ import { Badge } from '../ui/Badge';
 import type { SecurityEvent, EventSeverity } from '../../types/log';
 
 import { computePredictiveThreatScore } from '../../utils/threatScore';
+import { ResolveBlockIpModal } from './ResolveBlockIpModal';
 
 export const SecurityAlertsPage: React.FC = () => {
   const { 
@@ -34,7 +35,8 @@ export const SecurityAlertsPage: React.FC = () => {
     dismissAlert, 
     dismissEvent, 
     setCurrentRoute,
-    triggerRemediation
+    triggerRemediation,
+    isIpBlocked
   } = useApp();
 
   const [activeTab, setActiveTab] = useState<'all' | 'P1' | 'P2' | 'P3' | 'resolved'>('all');
@@ -474,7 +476,14 @@ export const SecurityAlertsPage: React.FC = () => {
                       {/* Source & IP */}
                       <td className="py-3.5 px-3.5 whitespace-nowrap font-mono">
                         <div className="font-bold text-cyan-300 text-xs">{item.source}</div>
-                        <div className="text-[10px] text-slate-400 mt-0.5">IP: {item.threatIp}</div>
+                        <div className="text-[10px] text-slate-400 mt-0.5 flex items-center gap-1">
+                          <span>IP: {item.threatIp}</span>
+                          {isIpBlocked(item.threatIp) && (
+                            <span className="text-[9px] px-1.5 py-0.5 rounded bg-rose-950/80 border border-rose-800 text-rose-300 font-bold font-mono">
+                              Blocked (Simulated)
+                            </span>
+                          )}
+                        </div>
                       </td>
 
                       {/* Timestamp */}
@@ -614,6 +623,9 @@ export const SecurityAlertsPage: React.FC = () => {
           </div>
         </div>
       )}
+
+      {/* Administrator CRITICAL Event Resolve -> Block IP Confirmation Modal */}
+      <ResolveBlockIpModal />
     </div>
   );
 };
