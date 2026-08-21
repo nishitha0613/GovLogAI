@@ -21,8 +21,6 @@ export interface LogEntry {
   mitigationScript?: string;
   hash?: string;
   prevHash?: string;
-  isTampered?: boolean;
-  tamperReason?: string;
   threatIntelFeed?: string;
 }
 
@@ -59,7 +57,6 @@ export interface SecurityEvent {
   relatedLogs: LogEntry[];
   mitigationExecuted: boolean;
   mitigationPlaybook: string;
-  auditStatus?: 'Verified' | 'Tampered';
 }
 
 export type AlertStatus = 'Open' | 'Acknowledged' | 'Investigating' | 'Resolved' | 'Muted';

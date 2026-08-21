@@ -2,7 +2,6 @@ import React, { createContext, useContext, useState, useEffect, type ReactNode }
 import type { LogEntry, SecurityEvent, AlertItem, EGovService, LogMetrics } from '../types/log';
 import type { ParsedAnalysisResult } from '../utils/logParser';
 import { mockEGovServices } from '../data/mockServices';
-import { verifyLogHashChain, computeLogHashChain } from '../utils/cryptoHasher';
 
 export type RouteType = 'landing' | 'dashboard' | 'logs' | 'security-alerts' | 'analytics' | 'settings' | 'events' | 'alerts';
 
@@ -44,32 +43,6 @@ interface AppContextType {
   analysisResult: ParsedAnalysisResult | null;
   setAnalysisResult: (result: ParsedAnalysisResult | null) => void;
   metrics: LogMetrics;
-
-  // Cryptographic Audit Trail Engine State & Handlers
-  auditResult: {
-    isChainValid: boolean;
-    totalLogs: number;
-    verifiedCount: number;
-    tamperedCount: number;
-    tamperedLogIds: string[];
-  };
-  tamperWithLog: (logId: string, newMessage?: string) => void;
-  recalculateAndSignChain: () => void;
-  verifyCurrentLogs: () => void;
-
-  // IP Blocking & Resolve Confirmation Workflow
-  blockedIps: string[];
-  blockIp: (ip: string, reason?: string) => void;
-  unblockIp: (ip: string) => void;
-  isIpBlocked: (ip: string) => boolean;
-  resolveIpPrompt: {
-    isOpen: boolean;
-    ip: string;
-    targetId: string;
-    title: string;
-    severity: string;
-  } | null;
-  closeResolveIpPrompt: () => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -197,28 +170,6 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
   const toggleLiveStreaming = () => setLiveStreaming((prev) => !prev);
 
-  const [blockedIps, setBlockedIps] = useState<string[]>([]);
-  const [resolveIpPrompt, setResolveIpPrompt] = useState<{
-    isOpen: boolean;
-    ip: string;
-    targetId: string;
-    title: string;
-    severity: string;
-  } | null>(null);
-
-  const blockIp = (ip: string, _reason?: string) => {
-    if (!ip || ip === 'Internal / Unspecified IP') return;
-    setBlockedIps((prev) => (prev.includes(ip) ? prev : [...prev, ip]));
-  };
-
-  const unblockIp = (ip: string) => {
-    setBlockedIps((prev) => prev.filter((i) => i !== ip));
-  };
-
-  const isIpBlocked = (ip: string) => blockedIps.includes(ip);
-
-  const closeResolveIpPrompt = () => setResolveIpPrompt(null);
-
   const acknowledgeAlert = (id: string) => {
     setAlerts((prev) =>
       prev.map((alert) => (alert.id === id ? { ...alert, status: 'Acknowledged', assignedTo: 'Current Analyst' } : alert))
@@ -232,34 +183,12 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   };
 
   const resolveAlert = (id: string) => {
-    const targetAlert = alerts.find((a) => a.id === id || a.relatedEventId === id);
-    const targetEvent = events.find((e) => e.id === id || e.id === `EVT-${id.replace(/\D/g, '')}` || id.includes(e.id));
-    const targetLog = logs.find((l) => l.id === id);
-
-    const severity = targetEvent?.severity || targetAlert?.severity || targetLog?.level || 'P3 Medium';
-    const rawIp = targetEvent?.threatActorIp || targetLog?.ipAddress || (targetAlert?.description.match(/\b(?:\d{1,3}\.){3}\d{1,3}\b/)?.[0]) || '185.220.101.44';
-    const title = targetEvent?.title || targetAlert?.title || targetLog?.message || 'Security Event';
-
     setAlerts((prev) =>
       prev.map((alert) => (alert.id === id || alert.relatedEventId === id ? { ...alert, status: 'Resolved' } : alert))
     );
     setEvents((prev) =>
       prev.map((evt) => (evt.id === id || evt.id === `EVT-${id.replace(/\D/g, '')}` || id.includes(evt.id) ? { ...evt, status: 'Resolved' } : evt))
     );
-
-    // CRITICAL Events ONLY trigger the IP Block confirmation prompt
-    const isCritical = severity.includes('P1') || severity.includes('Critical') || severity === 'CRITICAL' || severity === 'FATAL';
-
-    if (isCritical) {
-      const cleanIp = rawIp && rawIp !== 'Internal / Unspecified IP' ? rawIp : '185.220.101.44';
-      setResolveIpPrompt({
-        isOpen: true,
-        ip: cleanIp,
-        targetId: id,
-        title,
-        severity,
-      });
-    }
   };
 
   const dismissAlert = (id: string) => {
@@ -283,72 +212,6 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
           : alert
       )
     );
-  };
-
-  // Dynamic Cryptographic Audit Trail Verification
-  const auditVerification = verifyLogHashChain(logs);
-
-  const auditResult = {
-    isChainValid: auditVerification.isChainValid,
-    totalLogs: auditVerification.totalLogs,
-    verifiedCount: auditVerification.verifiedCount,
-    tamperedCount: auditVerification.tamperedCount,
-    tamperedLogIds: auditVerification.tamperedLogIds,
-  };
-
-  const tamperWithLog = (logId: string, newMessage?: string) => {
-    setLogs((prevLogs) => {
-      const updated = prevLogs.map((log) => {
-        if (log.id === logId) {
-          const tamperedMsg = newMessage || `${log.message} [UNAUTHORIZED EDIT / PAYLOAD TAMPERED]`;
-          return {
-            ...log,
-            message: tamperedMsg,
-          };
-        }
-        return log;
-      });
-      const verifiedResult = verifyLogHashChain(updated);
-      return verifiedResult.verifiedLogs;
-    });
-
-    if (selectedLog && selectedLog.id === logId) {
-      setSelectedLog((prev) =>
-        prev
-          ? {
-              ...prev,
-              message: newMessage || `${prev.message} [UNAUTHORIZED EDIT / PAYLOAD TAMPERED]`,
-              isTampered: true,
-              tamperReason: 'Cryptographic signature mismatch: Log message modified after hash signing',
-            }
-          : null
-      );
-    }
-  };
-
-  const recalculateAndSignChain = () => {
-    setLogs((prevLogs) => {
-      const hashBlocks = computeLogHashChain(prevLogs.map((l) => ({ id: l.id, raw: l.message, timestamp: l.timestamp })));
-      const reSigned = prevLogs.map((l, idx) => ({
-        ...l,
-        hash: hashBlocks[idx].hash,
-        prevHash: hashBlocks[idx].prevHash,
-        isTampered: false,
-        tamperReason: undefined,
-      }));
-      return reSigned;
-    });
-
-    if (selectedLog) {
-      setSelectedLog((prev) => (prev ? { ...prev, isTampered: false, tamperReason: undefined } : null));
-    }
-  };
-
-  const verifyCurrentLogs = () => {
-    setLogs((prev) => {
-      const verified = verifyLogHashChain(prev);
-      return verified.verifiedLogs;
-    });
   };
 
   return (
@@ -389,23 +252,12 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         analysisResult,
         setAnalysisResult,
         metrics,
-        auditResult,
-        tamperWithLog,
-        recalculateAndSignChain,
-        verifyCurrentLogs,
-        blockedIps,
-        blockIp,
-        unblockIp,
-        isIpBlocked,
-        resolveIpPrompt,
-        closeResolveIpPrompt,
       }}
     >
       {children}
     </AppContext.Provider>
   );
 };
-
 
 export const useApp = () => {
   const context = useContext(AppContext);

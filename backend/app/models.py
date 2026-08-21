@@ -16,9 +16,6 @@ class LogRecord(Base):
     response_time_ms = Column(Float, default=0.0)
     threat_vector = Column(String, default="Standard Log Operation")
     anomaly_score = Column(Float, default=0.0)
-    hash = Column(String, index=True, nullable=True)
-    prev_hash = Column(String, index=True, nullable=True)
-    is_tampered = Column(Boolean, default=False)
 
 class SecurityIncident(Base):
     __tablename__ = "security_incidents"

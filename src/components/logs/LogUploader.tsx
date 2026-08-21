@@ -19,18 +19,18 @@ export const LogUploader: React.FC<LogUploaderProps> = ({ onAnalysisComplete }) 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const sampleTraces: Record<string, string> = {
-    'tax_portal_access.log': `[2026-08-20 14:26:38] POST /api/v3/tax/submit-annual-return status=500 source_ip=10.240.12.89 db_pool=exhausted msg="Database connection pool 100% capacity starvation"
-[2026-08-20 14:26:39] GET /api/v3/tax/filings status=200 source_ip=10.240.12.90 msg="Tax filing summary query executed"
-[2026-08-20 14:26:40] POST /api/v3/tax/calculate status=500 source_ip=10.240.12.91 msg="Unindexed query timeout after 2400ms"
-[2026-08-20 14:26:41] GET /api/v3/tax/health status=200 source_ip=10.240.12.1 msg="K8s readiness probe healthy"`,
+    'tax_portal_access.log': `[2026-08-20 14:26:38] POST /api/v3/tax/submit-annual-return status=500 ip=10.240.12.89 db_pool=exhausted msg="Database connection pool 100% capacity starvation"
+[2026-08-20 14:26:39] GET /api/v3/tax/filings status=200 ip=10.240.12.90 msg="Tax filing summary query executed"
+[2026-08-20 14:26:40] POST /api/v3/tax/calculate status=500 ip=10.240.12.91 msg="Unindexed query timeout after 2400ms"
+[2026-08-20 14:26:41] GET /api/v3/tax/health status=200 ip=10.240.12.1 msg="K8s readiness probe healthy"`,
 
-    'border_biometrics.csv': `timestamp,service,method,endpoint,status,source_ip,message
-2026-08-20T14:26:45.102Z,Border Gateway,POST,/api/v2/visa/verify-passport,403,185.220.101.44,"CRITICAL: SQL Injection attempt UNION SELECT biometric_hash endpoint=/api/v2/visa/verify-passport source_ip=185.220.101.44"
-2026-08-20T14:26:46.001Z,Border Gateway,POST,/api/v2/biometrics/match-iris,503,10.250.0.12,"FATAL: HSM key vault lost socket connection endpoint=/api/v2/biometrics/match-iris source_ip=10.250.0.12"
-2026-08-20T14:26:47.412Z,Border Gateway,GET,/api/v2/visa/status,200,10.250.0.1,"INFO: Passport lookup successful source_ip=10.250.0.1"`,
+    'border_biometrics.csv': `timestamp,service,method,endpoint,status,ip,message
+2026-08-20T14:26:45.102Z,Border Gateway,POST,/api/v2/visa/verify-passport,403,185.220.101.44,"SQL Injection attempt UNION SELECT biometric_hash"
+2026-08-20T14:26:46.001Z,Border Gateway,POST,/api/v2/biometrics/match-iris,503,10.250.0.12,"HSM key vault lost socket connection"
+2026-08-20T14:26:47.412Z,Border Gateway,GET,/api/v2/visa/status,200,10.250.0.1,"Passport lookup successful"`,
 
-    'treasury_audit.txt': `[14:26:28] [CRITICAL] [Public Treasury Settlement API] POST /api/v1/treasury/authorize-disbursement - 401 (62ms) source_ip=45.154.255.89 msg="Privilege escalation attempt with alg: none JWT header endpoint=/api/v1/treasury/authorize-disbursement source_ip=45.154.255.89"
-[14:26:29] [INFO] [Public Treasury Settlement API] GET /api/v1/treasury/audit-trail - 200 (18ms) source_ip=10.128.0.4 msg="Authorized procurement auditor log query source_ip=10.128.0.4"`
+    'treasury_audit.txt': `[14:26:28] [CRITICAL] [Public Treasury Settlement API] POST /api/v1/treasury/authorize-disbursement - 401 (62ms) IP:45.154.255.89 msg="Privilege escalation attempt with alg: none JWT header"
+[14:26:29] [INFO] [Public Treasury Settlement API] GET /api/v1/treasury/audit-trail - 200 (18ms) IP:10.128.0.4 msg="Authorized procurement auditor log query"`
   };
 
   const handleDrag = (e: React.DragEvent) => {
